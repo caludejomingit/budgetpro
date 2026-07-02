@@ -93,18 +93,18 @@ export function generateInsights(input: InsightsInput): InsightNote[] {
   return notes;
 }
 
-/** Category-specific tips, keyed by category name — ported from TIP_LIBRARY. */
+/** Category-specific tips, keyed by category name. */
 export const TIP_LIBRARY: Record<string, string> = {
-  Groceries: 'Plan meals for the week and shop with a list — impulse buys often add 15–20% to grocery bills.',
-  'Food & Dining': 'Try cooking at home a couple of extra days a week; eating out usually costs 3–5x more per meal.',
-  'Bills & Utilities': 'Switch off standby appliances and compare utility plans once a year.',
-  Shopping: 'Give non-essential purchases a 24-hour wait before buying.',
-  Entertainment: 'Rotate subscriptions instead of running several at once.',
-  Transport: 'Combine errands into one trip, or explore carpooling for regular commutes.',
-  Subscriptions: 'Audit subscriptions every quarter — cancel anything unused in the last 30 days.',
-  Health: 'Preventive check-ups can be cheaper than treatment later — compare routine costs across providers.',
+  Grocery: 'Plan meals for the week and shop with a list — impulse buys often add 15–20% to grocery bills.',
+  Food: 'Try cooking at home a couple of extra days a week; eating out usually costs 3–5x more per meal.',
+  Petrol: 'Combine errands into one trip to cut down on fuel spent on short, repeated drives.',
+  'Travel Expense': 'Book cabs/tickets a little ahead of time — last-minute fares are usually the most expensive.',
   Rent: 'If rent is over 30% of income, it may be worth reviewing housing options at your next renewal.',
-  Education: 'Look for annual plans or scholarships instead of paying monthly.',
+  Bills: 'Switch off standby appliances and compare utility/subscription plans once a year.',
+  'Medical Bills': 'Preventive check-ups can be cheaper than treatment later — compare routine costs across providers.',
+  Shopping: 'Give non-essential purchases a 24-hour wait before buying.',
+  EMI: 'Check if prepaying a small extra amount now can shorten a loan and cut the total interest paid.',
+  Savings: "You're already paying yourself first here — consider nudging the SIP/KSFE amount up with each raise.",
   Miscellaneous: "Track 'miscellaneous' closely — vague categories often hide the most avoidable spending.",
 };
 

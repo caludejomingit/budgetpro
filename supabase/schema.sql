@@ -73,44 +73,31 @@ create policy "Delete own categories"
   using (auth.uid() = user_id);
 
 -- Seed default categories (user_id left null = visible to every user).
--- Names and colors are ported verbatim from the BudgetPro reference app
--- (github.com/caludejomingit/bugetprofinal, js/app.js CAT_COLORS) — the
--- client renders category glyphs from a local name-keyed icon map
--- (src/lib/constants/categories.ts), so `icon` here is just a Feather
--- fallback name, not the source of truth for the glyph shown in the UI.
+-- Expense categories match the user's real personal spending categories
+-- (grocery runs, petrol, rent, EMIs, etc.); the client renders category
+-- glyphs from a local name-keyed icon map (src/lib/constants/categories.ts),
+-- so `icon` here is just a Feather fallback name, not the source of truth
+-- for the glyph shown in the UI.
 insert into public.categories (name, type, icon, color, is_default) values
-  ('Salary',                'income',  'briefcase',      '#1E6B4E', true),
-  ('Freelance',              'income',  'trending-up',    '#C97452', true),
-  ('Business',               'income',  'target',         '#C9A03D', true),
-  ('Rental Income',          'income',  'home',           '#4C7A94', true),
-  ('Interest & Dividends',   'income',  'percent',        '#8B6BB0', true),
-  ('Refunds & Cashback',     'income',  'refresh-ccw',    '#3E8E7E', true),
-  ('Gifts',                  'income',  'gift',           '#B0574F', true),
-  ('Other Income',           'income',  'plus-circle',    '#6E8C4A', true),
-  ('Groceries',              'expense', 'shopping-cart',  '#1E6B4E', true),
-  ('Bills & Utilities',      'expense', 'zap',            '#C97452', true),
-  ('Mobile & Internet',      'expense', 'smartphone',     '#3D6B5C', true),
-  ('Food & Dining',          'expense', 'coffee',         '#C9A03D', true),
-  ('Transport',              'expense', 'navigation',     '#4C7A94', true),
-  ('Fuel',                   'expense', 'droplet',        '#8B6BB0', true),
-  ('Shopping',               'expense', 'shopping-bag',   '#3E8E7E', true),
-  ('Entertainment',          'expense', 'film',           '#B0574F', true),
-  ('Health',                 'expense', 'heart',          '#6E8C4A', true),
-  ('Medicine & Pharmacy',    'expense', 'plus-square',    '#8E5B4A', true),
-  ('Fitness',                'expense', 'activity',       '#A88B3F', true),
-  ('Personal Care',          'expense', 'sun',             '#4E6E8C', true),
-  ('Rent',                   'expense', 'home',           '#7A6E5E', true),
-  ('EMI & Loans',            'expense', 'file-text',      '#5B7A6E', true),
-  ('Home & Maintenance',     'expense', 'tool',           '#5C8A72', true),
-  ('Domestic Help',          'expense', 'users',          '#7A5D3F', true),
-  ('Subscriptions',          'expense', 'refresh-cw',     '#B0894A', true),
-  ('Insurance',              'expense', 'shield',         '#6B5B95', true),
-  ('Education',              'expense', 'book',           '#4F8FA6', true),
-  ('Travel',                 'expense', 'map-pin',        '#A65D57', true),
-  ('Pets',                   'expense', 'feather',        '#598C6E', true),
-  ('Childcare',              'expense', 'user',           '#8C7548', true),
-  ('Gifts & Donations',      'expense', 'gift',           '#7E6BA6', true),
-  ('Miscellaneous',          'expense', 'grid',           '#4E7A8C', true);
+  ('Salary',              'income',  'briefcase',      '#1E6B4E', true),
+  ('Freelance',           'income',  'trending-up',    '#C97452', true),
+  ('Business',            'income',  'target',         '#C9A03D', true),
+  ('Rental Income',       'income',  'home',           '#4C7A94', true),
+  ('Interest & Dividends','income',  'percent',        '#8B6BB0', true),
+  ('Refunds & Cashback',  'income',  'refresh-ccw',    '#3E8E7E', true),
+  ('Gifts',               'income',  'gift',           '#B0574F', true),
+  ('Other Income',        'income',  'plus-circle',    '#6E8C4A', true),
+  ('Grocery',             'expense', 'shopping-cart',  '#1E6B4E', true),
+  ('Food',                'expense', 'coffee',         '#C97452', true),
+  ('Petrol',              'expense', 'droplet',        '#8B6BB0', true),
+  ('Travel Expense',      'expense', 'map-pin',        '#A65D57', true),
+  ('Rent',                'expense', 'home',           '#7A6E5E', true),
+  ('Bills',               'expense', 'zap',            '#4C7A94', true),
+  ('Medical Bills',       'expense', 'plus-square',    '#8E5B4A', true),
+  ('Shopping',            'expense', 'shopping-bag',   '#3E8E7E', true),
+  ('EMI',                 'expense', 'file-text',      '#5B7A6E', true),
+  ('Savings',             'expense', 'trending-up',    '#C9A03D', true),
+  ('Miscellaneous',       'expense', 'grid',           '#6E7C73', true);
 
 -- ============================================================
 -- 3. transactions

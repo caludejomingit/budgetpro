@@ -117,7 +117,7 @@ export function handleChatIntent(raw: string, data: ChatData, lastSuggestion: Re
     if (cat && (EXPENSE_CATEGORIES as readonly string[]).includes(cat) && amount) {
       return { reply: `Done — I've set your ${cat} budget to ${formatCurrency(amount)} for this month.`, action: { type: 'setBudget', category: cat, amount } };
     }
-    return { reply: `Tell me the category and amount, like "set budget for Groceries to 6000".` };
+    return { reply: `Tell me the category and amount, like "set budget for Grocery to 6000".` };
   }
 
   if (/(suggest|plan|help).*(budget|save|savings)|budget.*(plan|suggest)/.test(lower)) {
@@ -146,5 +146,5 @@ export function handleChatIntent(raw: string, data: ChatData, lastSuggestion: Re
     };
   }
 
-  return { reply: `I can help you plan your budget. Try asking: "how am I doing this month?", "where can I save money?", "suggest a budget", or "set budget for Groceries to 5000".` };
+  return { reply: `I can help you plan your budget. Try asking: "how am I doing this month?", "where can I save money?", "suggest a budget", or "set budget for Grocery to 5000".` };
 }

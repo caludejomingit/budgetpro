@@ -1,34 +1,21 @@
 /**
- * Category icon paths and lists, ported verbatim from the BudgetPro reference
- * app (github.com/caludejomingit/bugetprofinal, js/app.js) for exact visual
- * fidelity. Each entry is raw SVG path/shape markup in a 24x24 viewBox,
- * rendered via react-native-svg (see CategoryGlyph.tsx).
+ * Category lists tuned to the user's actual real-life spending categories
+ * (grocery runs, petrol, rent, EMIs, etc.) rather than a generic reference
+ * taxonomy. Icons are raw SVG path/shape markup in a 24x24 viewBox, rendered
+ * via react-native-svg (see CategoryGlyph.tsx).
  */
 
 export const EXPENSE_CATEGORIES = [
-  'Groceries',
-  'Bills & Utilities',
-  'Mobile & Internet',
-  'Food & Dining',
-  'Transport',
-  'Fuel',
-  'Shopping',
-  'Entertainment',
-  'Health',
-  'Medicine & Pharmacy',
-  'Fitness',
-  'Personal Care',
+  'Grocery',
+  'Food',
+  'Petrol',
+  'Travel Expense',
   'Rent',
-  'EMI & Loans',
-  'Home & Maintenance',
-  'Domestic Help',
-  'Subscriptions',
-  'Insurance',
-  'Education',
-  'Travel',
-  'Pets',
-  'Childcare',
-  'Gifts & Donations',
+  'Bills',
+  'Medical Bills',
+  'Shopping',
+  'EMI',
+  'Savings',
   'Miscellaneous',
 ] as const;
 
@@ -45,9 +32,17 @@ export const INCOME_CATEGORIES = [
 
 /** One distinct color per expense category, in EXPENSE_CATEGORIES order. */
 export const CAT_COLORS: string[] = [
-  '#1E6B4E', '#C97452', '#3D6B5C', '#C9A03D', '#4C7A94', '#8B6BB0', '#3E8E7E', '#B0574F',
-  '#6E8C4A', '#8E5B4A', '#A88B3F', '#4E6E8C', '#7A6E5E', '#5B7A6E', '#5C8A72', '#7A5D3F',
-  '#B0894A', '#6B5B95', '#4F8FA6', '#A65D57', '#598C6E', '#8C7548', '#7E6BA6', '#4E7A8C',
+  '#1E6B4E', // Grocery
+  '#C97452', // Food
+  '#8B6BB0', // Petrol
+  '#A65D57', // Travel Expense
+  '#7A6E5E', // Rent
+  '#4C7A94', // Bills
+  '#8E5B4A', // Medical Bills
+  '#3E8E7E', // Shopping
+  '#5B7A6E', // EMI
+  '#C9A03D', // Savings
+  '#6E7C73', // Miscellaneous (catch-all — muted)
 ];
 
 export function categoryColor(name: string): string {
@@ -63,71 +58,35 @@ interface IconShape {
   polygon?: string;
 }
 
-/** Raw shape data per category — mirrors the reference's ICONS object. */
+/** Raw shape data per category, rendered by CategoryGlyph.tsx. */
 export const CATEGORY_ICON_SHAPES: Record<string, IconShape[]> = {
-  Groceries: [
+  Grocery: [
     { circles: [{ cx: 9, cy: 20, r: 1.3 }, { cx: 17, cy: 20, r: 1.3 }] },
     { path: 'M2 3h2l2.4 12.2a2 2 0 0 0 2 1.6h7.4a2 2 0 0 0 2-1.6L20 7H6' },
   ],
-  'Bills & Utilities': [{ polygon: '12,2 4,14 11,14 10,22 20,9 13,9' }],
-  'Mobile & Internet': [
-    { rect: { x: 7, y: 2, width: 10, height: 20, rx: 2 } },
-    { circles: [{ cx: 12, cy: 18, r: 1 }] },
-    { path: 'M9 5h6' },
-  ],
-  'Food & Dining': [{ path: 'M6 2v7a2 2 0 0 0 4 0V2M8 2v20M16 2c-1.2 1.5-2 3-2 5s.8 3.5 2 5v10' }],
-  Transport: [
-    { path: 'M3 13l1.5-4.5A2 2 0 0 1 6.4 7h11.2a2 2 0 0 1 1.9 1.5L21 13' },
-    { rect: { x: 2, y: 13, width: 20, height: 6, rx: 1.5 } },
-    { circles: [{ cx: 7, cy: 19, r: 1.4 }, { cx: 17, cy: 19, r: 1.4 }] },
-  ],
-  Fuel: [
+  Food: [{ path: 'M6 2v7a2 2 0 0 0 4 0V2M8 2v20M16 2c-1.2 1.5-2 3-2 5s.8 3.5 2 5v10' }],
+  Petrol: [
     { path: 'M5 21V6a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v15' },
     { path: 'M4 21h11' },
     { path: 'M14 9h2a2 2 0 0 1 2 2v4a1.5 1.5 0 0 0 3 0V8l-3-3' },
   ],
-  Shopping: [{ path: 'M6 8h12l-1 12H7L6 8z' }, { path: 'M9 8V6a3 3 0 0 1 6 0v2' }],
-  Entertainment: [{ circles: [{ cx: 12, cy: 12, r: 9 }] }, { polygon: '10,8.5 16,12 10,15.5' }],
-  Health: [{ path: 'M12 20s-7-4.6-9.3-9.1C1.2 7.9 2.9 4.7 6 4.2c2-.3 3.6.9 6 3.5 2.4-2.6 4-3.8 6-3.5 3.1.5 4.8 3.7 3.3 6.7C19 15.4 12 20 12 20z' }],
-  'Medicine & Pharmacy': [
-    { rect: { x: 3, y: 3, width: 18, height: 18, rx: 5 } },
-    { path: 'M12 8v8M8 12h8' },
-  ],
-  Fitness: [{ path: 'M4 9v6M20 9v6M2 12h2M20 12h2M7 7v10M17 7v10M7 12h10' }],
-  'Personal Care': [{ path: 'M12 3v4M12 17v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M3 12h4M17 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8' }],
-  Rent: [{ path: 'M4 11l8-7 8 7' }, { path: 'M6 10v10h12V10' }],
-  'EMI & Loans': [
-    { rect: { x: 5, y: 3, width: 14, height: 18, rx: 2 } },
-    { path: 'M8 8h8M8 12h8M8 16h5' },
-  ],
-  'Home & Maintenance': [{ path: 'M14.7 6.3a4 4 0 1 0-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 0 0 5.4-5.4l-2.3 2.3-2-2 2.3-2.3z' }],
-  'Domestic Help': [
-    { rect: { x: 7, y: 10, width: 10, height: 10, rx: 1 } },
-    { path: 'M9 10V7a3 3 0 0 1 6 0v3' },
-  ],
-  Subscriptions: [{ path: 'M4 4v5h5M20 20v-5h-5' }, { path: 'M20 9a8 8 0 0 0-14.3-4.3M4 15a8 8 0 0 0 14.3 4.3' }],
-  Insurance: [{ path: 'M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z' }, { path: 'M9 12l2 2 4-4' }],
-  Education: [
-    { path: 'M4 5a2 2 0 0 1 2-2h6v18H6a2 2 0 0 1-2-2z' },
-    { path: 'M20 5a2 2 0 0 0-2-2h-6v18h6a2 2 0 0 0 2-2z' },
-  ],
-  Travel: [
+  'Travel Expense': [
     { rect: { x: 4, y: 8, width: 16, height: 12, rx: 2 } },
     { path: 'M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2' },
     { path: 'M4 13h16' },
   ],
-  Pets: [
-    { circles: [{ cx: 7, cy: 8, r: 1.6 }, { cx: 12, cy: 6, r: 1.6 }, { cx: 17, cy: 8, r: 1.6 }] },
-    {
-      path: 'M12 21c-3 0-5-1.6-5-4 0-2 1.7-3 3.2-3.6.6-.2 1-.8 1-1.4 0-.5.3-1 .8-1 .5 0 .8.5.8 1 0 .6.4 1.2 1 1.4C15.3 14 17 15 17 17c0 2.4-2 4-5 4z',
-    },
+  Rent: [{ path: 'M4 11l8-7 8 7' }, { path: 'M6 10v10h12V10' }],
+  Bills: [{ polygon: '12,2 4,14 11,14 10,22 20,9 13,9' }],
+  'Medical Bills': [
+    { rect: { x: 3, y: 3, width: 18, height: 18, rx: 5 } },
+    { path: 'M12 8v8M8 12h8' },
   ],
-  Childcare: [{ circles: [{ cx: 12, cy: 7, r: 3 }] }, { path: 'M7 21v-2a5 5 0 0 1 5-5 5 5 0 0 1 5 5v2' }],
-  'Gifts & Donations': [
-    { rect: { x: 3, y: 8, width: 18, height: 13 } },
-    { path: 'M3 8h18M12 8v13' },
-    { path: 'M12 8c-1.5-4-6-4-6 0M12 8c1.5-4 6-4 6 0' },
+  Shopping: [{ path: 'M6 8h12l-1 12H7L6 8z' }, { path: 'M9 8V6a3 3 0 0 1 6 0v2' }],
+  EMI: [
+    { rect: { x: 5, y: 3, width: 14, height: 18, rx: 2 } },
+    { path: 'M8 8h8M8 12h8M8 16h5' },
   ],
+  Savings: [{ path: 'M4 17l5-5 4 4 7-7' }, { path: 'M15 9h5v5' }],
   Miscellaneous: [
     {
       circles: [
