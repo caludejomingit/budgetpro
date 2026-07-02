@@ -24,8 +24,10 @@ create policy "Users can update own profile"
   on public.profiles for update
   using (auth.uid() = id);
 
--- Auto-create a profile row whenever a new auth user signs up
-create function public.handle_new_user()
+-- Auto-create a profile row whenever a new auth user signs up.
+-- create-or-replace + drop-trigger-if-exists so this file can be safely
+-- re-run even if only some of the tables below were dropped/recreated.
+create or replace function public.handle_new_user()
 returns trigger as $$
 begin
   insert into public.profiles (id, email)
@@ -34,6 +36,7 @@ begin
 end;
 $$ language plpgsql security definer;
 
+drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
