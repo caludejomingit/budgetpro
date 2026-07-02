@@ -1,4 +1,4 @@
-import { StyleSheet, View, useColorScheme } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { ChartColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -10,8 +10,7 @@ interface ProgressBarProps {
 
 export function ProgressBar({ ratio, height = 8 }: ProgressBarProps) {
   const theme = useTheme();
-  const scheme = useColorScheme();
-  const palette = ChartColors[scheme === 'dark' ? 'dark' : 'light'];
+  const palette = ChartColors.light;
 
   const fillColor = ratio >= 1 ? palette.status.critical : ratio >= 0.8 ? palette.status.warning : palette.status.good;
   const width = `${Math.min(Math.max(ratio, 0), 1) * 100}%` as const;

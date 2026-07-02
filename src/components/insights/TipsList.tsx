@@ -1,16 +1,25 @@
 import { Feather } from '@expo/vector-icons';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { useTheme } from '@/hooks/use-theme';
 import { shuffle } from '@/lib/insights/savingsTips';
 
-/** Shows up to 3 tips from `pool`, freshly shuffled on every mount (i.e. every screen visit),
- * matching the reference app's renderTips() which reshuffles on each page load. */
+const ROTATE_MS = 30_000;
+
+/** Shows up to 3 tips from `pool`, reshuffled every 30 seconds so the set keeps changing. */
 export function TipsList({ pool }: { pool: string[] }) {
   const theme = useTheme();
-  const tips = useMemo(() => shuffle(pool).slice(0, Math.min(3, pool.length)), [pool]);
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    if (pool.length <= 3) return;
+    const id = setInterval(() => setTick((t) => t + 1), ROTATE_MS);
+    return () => clearInterval(id);
+  }, [pool.length]);
+
+  const tips = useMemo(() => shuffle(pool).slice(0, Math.min(3, pool.length)), [pool, tick]);
 
   return (
     <View style={styles.list}>

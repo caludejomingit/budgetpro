@@ -10,10 +10,9 @@ import {
   useFonts,
 } from '@expo-google-fonts/public-sans';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
 
 import { AuthProvider, useAuth } from '@/lib/auth/AuthContext';
 import { MonthProvider } from '@/lib/state/MonthContext';
@@ -42,7 +41,6 @@ function RootNavigator() {
 }
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const [fontsLoaded] = useFonts({
     PublicSans_400Regular,
     PublicSans_600SemiBold,
@@ -60,7 +58,7 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={DefaultTheme}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <MonthProvider>
