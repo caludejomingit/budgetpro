@@ -1,72 +1,62 @@
-import { Feather } from '@expo/vector-icons';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { BudgetVsActualChart } from '@/components/charts/BudgetVsActualChart';
-import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
-import { RotatingTipNote } from '@/components/insights/RotatingTipNote';
+import { NoteCard } from '@/components/insights/NoteCard';
+import { TipsList } from '@/components/insights/TipsList';
 import { ThemedText } from '@/components/themed-text';
-import { MonthPicker } from '@/components/transactions/MonthPicker';
 import { Card } from '@/components/ui/Card';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useTheme } from '@/hooks/use-theme';
 import { useBudgets } from '@/hooks/useBudgets';
 import { useMonthlySummary } from '@/hooks/useMonthlySummary';
 import { useTransactions } from '@/hooks/useTransactions';
-import { GENERAL_SAVINGS_TIPS } from '@/lib/constants/generalTips';
-import { currentMonthKey, daysRemainingInMonth, previousMonthKey, type MonthKey } from '@/lib/format/date';
-import { generateSavingsTips } from '@/lib/insights/savingsTips';
+import { buildTipsPool, generateInsights } from '@/lib/insights/savingsTips';
+import { daysRemainingInMonth, previousMonthKey } from '@/lib/format/date';
+import { useMonth } from '@/lib/state/MonthContext';
 
 export default function InsightsScreen() {
   const theme = useTheme();
-  const [monthKey, setMonthKey] = useState<MonthKey>(currentMonthKey());
-  const prevMonthKey = previousMonthKey(monthKey);
+  const { viewMonth } = useMonth();
+  const prevMonthKey = previousMonthKey(viewMonth);
 
-  const { data: transactions } = useTransactions(monthKey);
+  const { data: transactions } = useTransactions(viewMonth);
   const { data: prevTransactions } = useTransactions(prevMonthKey);
-  const { data: budgets } = useBudgets(monthKey);
+  const { data: budgets } = useBudgets(viewMonth);
 
   const summary = useMonthlySummary(transactions);
   const prevSummary = useMonthlySummary(prevTransactions);
 
-  const budgetRows = useMemo(() => {
-    const spentByCategory = new Map(summary.expenseByCategory.map((c) => [c.categoryId, c]));
-    return (budgets ?? [])
-      .filter((b) => b.limit_amount > 0)
-      .map((b) => ({
-        categoryId: b.category_id,
-        categoryName: b.category?.name ?? 'Category',
-        spent: spentByCategory.get(b.category_id)?.amount ?? 0,
-        limit: b.limit_amount,
-      }));
-  }, [budgets, summary]);
-
-  const tips = useMemo(
+  const notes = useMemo(
     () =>
-      generateSavingsTips({
+      generateInsights({
         currentMonthExpense: summary.expenseByCategory.map((c) => ({ categoryId: c.categoryId, categoryName: c.categoryName, amount: c.amount })),
         previousMonthExpense: prevSummary.expenseByCategory.map((c) => ({ categoryId: c.categoryId, categoryName: c.categoryName, amount: c.amount })),
         budgets: (budgets ?? []).map((b) => ({ categoryId: b.category_id, categoryName: b.category?.name ?? '', limitAmount: b.limit_amount })),
         totalIncome: summary.totalIncome,
         totalExpense: summary.totalExpense,
-        daysRemainingInMonth: daysRemainingInMonth(monthKey),
+        daysRemainingInMonth: daysRemainingInMonth(viewMonth) || null,
       }),
-    [summary, prevSummary, budgets, monthKey]
+    [summary, prevSummary, budgets, viewMonth]
   );
 
+  const tipsPool = buildTipsPool(summary.expenseByCategory.map((c) => ({ categoryId: c.categoryId, categoryName: c.categoryName, amount: c.amount })));
+
   return (
-    <SafeAreaView style={[styles.flex, { backgroundColor: theme.background }]} edges={['top']}>
+    <SafeAreaView style={[styles.flex, { backgroundColor: theme.background }]} edges={[]}>
       <ScrollView contentContainerStyle={styles.content}>
         <ScreenHeader eyebrow="Notes from your numbers" title="What your diary is telling you" accent="telling you" />
-        <MonthPicker monthKey={monthKey} onChange={setMonthKey} />
 
         <Card style={styles.card}>
           <ThemedText type="smallBold">This month&apos;s notes</ThemedText>
           <ThemedText type="small" themeColor="textSecondary" style={styles.cardSubtitle}>
-            Written from your own numbers, refreshes every 30s
+            Written from your own numbers
           </ThemedText>
-          <RotatingTipNote tips={tips} />
+          <View style={styles.notesGrid}>
+            {notes.map((note) => (
+              <NoteCard key={note.tag + note.text} note={note} />
+            ))}
+          </View>
         </Card>
 
         <Card style={styles.card}>
@@ -74,30 +64,7 @@ export default function InsightsScreen() {
           <ThemedText type="small" themeColor="textSecondary" style={styles.cardSubtitle}>
             A few habits worth trying
           </ThemedText>
-          <View style={styles.habitList}>
-            {GENERAL_SAVINGS_TIPS.slice(0, 3).map((habit) => (
-              <View key={habit} style={styles.habitRow}>
-                <Feather name="check-circle" size={15} color={theme.primary} style={styles.habitIcon} />
-                <ThemedText type="small" style={styles.habitText}>
-                  {habit}
-                </ThemedText>
-              </View>
-            ))}
-          </View>
-        </Card>
-
-        <Card style={styles.card}>
-          <ThemedText type="smallBold" style={styles.sectionTitle}>
-            Spending by category
-          </ThemedText>
-          <CategoryBreakdownChart data={summary.expenseByCategory} />
-        </Card>
-
-        <Card style={styles.card}>
-          <ThemedText type="smallBold" style={styles.sectionTitle}>
-            Budget vs. actual
-          </ThemedText>
-          <BudgetVsActualChart rows={budgetRows} />
+          <TipsList pool={tipsPool} />
         </Card>
       </ScrollView>
     </SafeAreaView>
@@ -109,9 +76,5 @@ const styles = StyleSheet.create({
   content: { padding: 20, gap: 16, paddingBottom: 40 },
   card: { gap: 4 },
   cardSubtitle: { marginBottom: 8 },
-  sectionTitle: { marginBottom: 4 },
-  habitList: { gap: 10, marginTop: 4 },
-  habitRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
-  habitIcon: { marginTop: 2 },
-  habitText: { flex: 1, lineHeight: 19 },
+  notesGrid: { gap: 12 },
 });

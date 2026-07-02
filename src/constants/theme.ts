@@ -76,32 +76,15 @@ export const ChartColors = {
   },
 } as const;
 
-export const Fonts = Platform.select({
-  ios: {
-    sans: 'PublicSans_400Regular',
-    sansMedium: 'PublicSans_600SemiBold',
-    sansBold: 'PublicSans_700Bold',
-    serif: 'Fraunces_600SemiBold',
-    serifItalic: 'Fraunces_500Medium_Italic',
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'PublicSans_400Regular',
-    sansMedium: 'PublicSans_600SemiBold',
-    sansBold: 'PublicSans_700Bold',
-    serif: 'Fraunces_600SemiBold',
-    serifItalic: 'Fraunces_500Medium_Italic',
-    mono: 'monospace',
-  },
-  web: {
-    sans: 'PublicSans_400Regular',
-    sansMedium: 'PublicSans_600SemiBold',
-    sansBold: 'PublicSans_700Bold',
-    serif: 'Fraunces_600SemiBold',
-    serifItalic: 'Fraunces_500Medium_Italic',
-    mono: 'ui-monospace',
-  },
-});
+export const Fonts = {
+  sans: 'PublicSans_400Regular',
+  sansMedium: 'PublicSans_600SemiBold',
+  sansBold: 'PublicSans_700Bold',
+  serif: 'Fraunces_600SemiBold',
+  serifItalic: 'Fraunces_500Medium_Italic',
+  mono: 'IBMPlexMono_400Regular',
+  monoBold: 'IBMPlexMono_600SemiBold',
+} as const;
 
 export const Radius = {
   lg: 20,

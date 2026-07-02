@@ -9,6 +9,7 @@ import { z } from 'zod';
 
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
+import { CategoryGlyph } from '@/components/ui/CategoryGlyph';
 import { Input } from '@/components/ui/Input';
 import { Radius } from '@/constants/theme';
 import { useCategories } from '@/hooks/useCategories';
@@ -68,7 +69,7 @@ export function TransactionForm({ initialValues, onSubmit, submitLabel }: Props)
       <View style={styles.typeToggle}>
         {(['expense', 'income'] as const).map((t) => {
           const active = type === t;
-          const color = t === 'income' ? theme.success : theme.danger;
+          const color = t === 'income' ? theme.primary : theme.clay;
           return (
             <Pressable
               key={t}
@@ -94,6 +95,7 @@ export function TransactionForm({ initialValues, onSubmit, submitLabel }: Props)
             onChangeText={onChange}
             value={value}
             error={errors.amount?.message}
+            style={{ fontFamily: 'IBMPlexMono_400Regular' }}
           />
         )}
       />
@@ -109,7 +111,7 @@ export function TransactionForm({ initialValues, onSubmit, submitLabel }: Props)
               key={c.id}
               onPress={() => setValue('categoryId', c.id, { shouldValidate: true })}
               style={[styles.categoryChip, { backgroundColor: active ? `${c.color}22` : theme.backgroundSelected, borderColor: active ? c.color ?? theme.border : 'transparent' }]}>
-              <Feather name={(c.icon as any) ?? 'circle'} size={16} color={c.color ?? theme.text} />
+              <CategoryGlyph name={c.name} size={15} />
               <ThemedText type="small">{c.name}</ThemedText>
             </Pressable>
           );

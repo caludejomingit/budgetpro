@@ -2,6 +2,7 @@ import {
   Fraunces_500Medium_Italic,
   Fraunces_600SemiBold,
 } from '@expo-google-fonts/fraunces';
+import { IBMPlexMono_400Regular, IBMPlexMono_600SemiBold } from '@expo-google-fonts/ibm-plex-mono';
 import {
   PublicSans_400Regular,
   PublicSans_600SemiBold,
@@ -15,6 +16,7 @@ import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 
 import { AuthProvider, useAuth } from '@/lib/auth/AuthContext';
+import { MonthProvider } from '@/lib/state/MonthContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -47,6 +49,8 @@ export default function RootLayout() {
     PublicSans_700Bold,
     Fraunces_600SemiBold,
     Fraunces_500Medium_Italic,
+    IBMPlexMono_400Regular,
+    IBMPlexMono_600SemiBold,
   });
 
   useEffect(() => {
@@ -59,7 +63,9 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <RootNavigator />
+          <MonthProvider>
+            <RootNavigator />
+          </MonthProvider>
         </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>

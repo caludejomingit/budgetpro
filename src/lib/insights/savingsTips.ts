@@ -1,10 +1,11 @@
-export type TipSeverity = 'info' | 'warning' | 'critical';
+import { formatCurrency } from '@/lib/format/currency';
 
-export interface Tip {
-  id: string;
-  severity: TipSeverity;
-  message: string;
-  categoryId?: string;
+export type NoteVariant = 'default' | 'warn' | 'gold';
+
+export interface InsightNote {
+  tag: string;
+  variant: NoteVariant;
+  text: string;
 }
 
 export interface CategorySpend {
@@ -19,105 +20,114 @@ export interface BudgetInput {
   limitAmount: number;
 }
 
-export interface TipInput {
+export interface InsightsInput {
   currentMonthExpense: CategorySpend[];
   previousMonthExpense: CategorySpend[];
   budgets: BudgetInput[];
   totalIncome: number;
   totalExpense: number;
-  daysRemainingInMonth: number;
+  daysRemainingInMonth: number | null;
 }
 
-const DISCRETIONARY_CATEGORY_NAMES = new Set(['Food & Dining', 'Shopping', 'Entertainment']);
+/** Ported from the BudgetPro reference app's generateInsights() (js/app.js). */
+export function generateInsights(input: InsightsInput): InsightNote[] {
+  const notes: InsightNote[] = [];
+  const spendByCategory = new Map(input.currentMonthExpense.map((c) => [c.categoryId, c]));
+  const prevByCategory = new Map(input.previousMonthExpense.map((c) => [c.categoryId, c.amount]));
 
-function pct(from: number, to: number): number {
-  if (from === 0) return 0;
-  return ((to - from) / from) * 100;
-}
-
-export function generateSavingsTips(input: TipInput): Tip[] {
-  const tips: Tip[] = [];
-  const previousByCategory = new Map(input.previousMonthExpense.map((c) => [c.categoryId, c]));
-  const budgetByCategory = new Map(input.budgets.map((b) => [b.categoryId, b]));
-
-  // 1. Negative net month — most urgent, surfaced first.
-  if (input.totalExpense > input.totalIncome && input.totalIncome > 0) {
-    tips.push({
-      id: 'negative-net',
-      severity: 'critical',
-      message: `You've spent more than you earned this month — expenses are ₹${Math.round(
-        input.totalExpense - input.totalIncome
-      ).toLocaleString('en-IN')} over income so far.`,
-    });
-  }
-
-  // 2. Over-budget categories.
-  for (const spend of input.currentMonthExpense) {
-    const budget = budgetByCategory.get(spend.categoryId);
-    if (!budget || budget.limitAmount <= 0) continue;
-    const ratio = spend.amount / budget.limitAmount;
-    if (ratio > 1) {
-      tips.push({
-        id: `over-budget-${spend.categoryId}`,
-        severity: 'critical',
-        message: `${spend.categoryName} is over budget by ₹${Math.round(spend.amount - budget.limitAmount).toLocaleString(
-          'en-IN'
-        )} this month.`,
-        categoryId: spend.categoryId,
+  for (const budget of input.budgets) {
+    if (budget.limitAmount <= 0) continue;
+    const spent = spendByCategory.get(budget.categoryId)?.amount ?? 0;
+    const pct = Math.round((spent / budget.limitAmount) * 100);
+    if (pct >= 100) {
+      notes.push({
+        tag: 'Over budget',
+        variant: 'warn',
+        text: `You've gone past your ${budget.categoryName} budget by ${formatCurrency(spent - budget.limitAmount)}. Might be worth a closer look before month-end.`,
       });
-    } else if (ratio >= 0.8) {
-      tips.push({
-        id: `approaching-budget-${spend.categoryId}`,
-        severity: 'warning',
-        message: `You've used ${Math.round(ratio * 100)}% of your ${spend.categoryName} budget${
-          input.daysRemainingInMonth > 0 ? ` with ${input.daysRemainingInMonth} days left in the month` : ''
-        }.`,
-        categoryId: spend.categoryId,
+    } else if (pct >= 80) {
+      const dayText = input.daysRemainingInMonth !== null ? ` with ${input.daysRemainingInMonth} day${input.daysRemainingInMonth === 1 ? '' : 's'} left` : '';
+      notes.push({
+        tag: 'Getting close',
+        variant: 'warn',
+        text: `${budget.categoryName} is already at ${pct}% of its ${formatCurrency(budget.limitAmount)} budget${dayText}.`,
       });
     }
   }
 
-  // 3. Category month-over-month spikes.
-  for (const spend of input.currentMonthExpense) {
-    const previous = previousByCategory.get(spend.categoryId);
-    if (!previous || previous.amount <= 0) continue;
-    const change = pct(previous.amount, spend.amount);
-    if (change > 25) {
-      tips.push({
-        id: `spike-${spend.categoryId}`,
-        severity: 'warning',
-        message: `${spend.categoryName} spending is up ${Math.round(change)}% vs last month (₹${Math.round(
-          previous.amount
-        ).toLocaleString('en-IN')} → ₹${Math.round(spend.amount).toLocaleString('en-IN')}).`,
-        categoryId: spend.categoryId,
-      });
+  const topCats = [...input.currentMonthExpense].sort((a, b) => b.amount - a.amount).slice(0, 2);
+  for (const c of topCats) {
+    const prevAmt = prevByCategory.get(c.categoryId) ?? 0;
+    if (prevAmt > 0) {
+      const change = Math.round(((c.amount - prevAmt) / prevAmt) * 100);
+      if (Math.abs(change) >= 15) {
+        notes.push({
+          tag: change > 0 ? 'Trending up' : 'Trending down',
+          variant: change > 0 ? 'warn' : 'default',
+          text: `${c.categoryName} spending is ${change > 0 ? 'up' : 'down'} ${Math.abs(change)}% compared to last month.`,
+        });
+      }
     }
   }
 
-  // 4. High discretionary spend share.
-  if (input.totalExpense > 0) {
-    const discretionaryTotal = input.currentMonthExpense
-      .filter((c) => DISCRETIONARY_CATEGORY_NAMES.has(c.categoryName))
-      .reduce((sum, c) => sum + c.amount, 0);
-    const share = discretionaryTotal / input.totalExpense;
-    if (share > 0.3) {
-      tips.push({
-        id: 'high-discretionary-share',
-        severity: 'info',
-        message: `${Math.round(share * 100)}% of your spending this month is on food, shopping, and entertainment — small cuts here go furthest.`,
-      });
+  const net = input.totalIncome - input.totalExpense;
+  if (input.totalIncome > 0) {
+    const rate = Math.round((net / input.totalIncome) * 100);
+    if (rate >= 20) {
+      notes.push({ tag: 'Nicely done', variant: 'gold', text: `You're saving ${rate}% of your income this month — well above the 20% mark most planners aim for.` });
+    } else if (rate >= 0) {
+      notes.push({ tag: 'Room to grow', variant: 'default', text: `You're keeping ${rate}% of your income this month. Trimming your top category a little could push this higher.` });
+    } else {
+      notes.push({ tag: 'Spending more than earning', variant: 'warn', text: `Expenses are ${formatCurrency(Math.abs(net))} more than income this month. Worth pausing non-essential spending.` });
     }
+  } else if (input.totalExpense > 0) {
+    notes.push({ tag: 'No income logged', variant: 'warn', text: `You've logged ${formatCurrency(input.totalExpense)} in expenses but no income yet for this month.` });
   }
 
-  // 5. Fallback when no budgets are set — rules 2/3 need budget data to be most useful.
   if (input.budgets.length === 0) {
-    tips.push({
-      id: 'no-budgets-set',
-      severity: 'info',
-      message: 'Set a monthly budget for your top spending categories to get over-budget warnings here.',
-    });
+    notes.push({ tag: 'Tip', variant: 'gold', text: `You haven't set any budgets yet. Add a few and your diary will start flagging overspending automatically.` });
   }
+  if (notes.length === 0) {
+    notes.push({ tag: 'All quiet', variant: 'default', text: `Nothing to flag this month. Keep logging entries and I'll keep watching your numbers.` });
+  }
+  return notes;
+}
 
-  const severityRank: Record<TipSeverity, number> = { critical: 0, warning: 1, info: 2 };
-  return tips.sort((a, b) => severityRank[a.severity] - severityRank[b.severity]);
+/** Category-specific tips, keyed by category name — ported from TIP_LIBRARY. */
+export const TIP_LIBRARY: Record<string, string> = {
+  Groceries: 'Plan meals for the week and shop with a list — impulse buys often add 15–20% to grocery bills.',
+  'Food & Dining': 'Try cooking at home a couple of extra days a week; eating out usually costs 3–5x more per meal.',
+  'Bills & Utilities': 'Switch off standby appliances and compare utility plans once a year.',
+  Shopping: 'Give non-essential purchases a 24-hour wait before buying.',
+  Entertainment: 'Rotate subscriptions instead of running several at once.',
+  Transport: 'Combine errands into one trip, or explore carpooling for regular commutes.',
+  Subscriptions: 'Audit subscriptions every quarter — cancel anything unused in the last 30 days.',
+  Health: 'Preventive check-ups can be cheaper than treatment later — compare routine costs across providers.',
+  Rent: 'If rent is over 30% of income, it may be worth reviewing housing options at your next renewal.',
+  Education: 'Look for annual plans or scholarships instead of paying monthly.',
+  Miscellaneous: "Track 'miscellaneous' closely — vague categories often hide the most avoidable spending.",
+};
+
+export const GENERAL_TIPS: string[] = [
+  "Automate a fixed transfer to savings right after you're paid, before spending starts.",
+  'Review your top 3 spending categories every Sunday — five minutes is usually enough.',
+  "Keep a small buffer for irregular costs (birthdays, repairs) so they don't derail your budget.",
+];
+
+export function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/** Builds the shuffled tip pool (relevant category tips + general tips), matching renderTips(). */
+export function buildTipsPool(currentMonthExpense: CategorySpend[]): string[] {
+  const spentCatsWithTips = [...currentMonthExpense]
+    .sort((a, b) => b.amount - a.amount)
+    .map((c) => c.categoryName)
+    .filter((name) => TIP_LIBRARY[name]);
+  return [...spentCatsWithTips.map((name) => TIP_LIBRARY[name]), ...GENERAL_TIPS];
 }

@@ -1,33 +1,33 @@
 import { Platform } from 'react-native';
+import * as XLSX from 'xlsx';
 
-import { formatMonthShort } from '@/lib/format/date';
 import type { TransactionWithCategory } from '@/types/database';
 
-function csvEscape(value: string): string {
-  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-    return `"${value.replace(/"/g, '""')}"`;
-  }
-  return value;
+function buildWorkbook(transactions: TransactionWithCategory[]) {
+  const rows = [...transactions]
+    .sort((a, b) => a.occurred_on.localeCompare(b.occurred_on))
+    .map((t) => ({
+      Date: t.occurred_on,
+      Type: t.type === 'income' ? 'Income' : 'Expense',
+      Category: t.category?.name ?? 'Other',
+      Note: t.note ?? '',
+      'Amount (₹)': t.amount,
+    }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{ wch: 12 }, { wch: 10 }, { wch: 20 }, { wch: 32 }, { wch: 14 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Transactions');
+  return wb;
 }
 
-function buildCsv(transactions: TransactionWithCategory[]): string {
-  const header = ['Date', 'Type', 'Category', 'Amount', 'Note'];
-  const rows = transactions.map((t) => [
-    t.occurred_on,
-    t.type === 'income' ? 'Income' : 'Expense',
-    t.category?.name ?? 'Other',
-    t.amount.toFixed(2),
-    t.note ?? '',
-  ]);
-  return [header, ...rows].map((row) => row.map((cell) => csvEscape(String(cell))).join(',')).join('\n');
-}
-
-export async function exportTransactionsToCsv(transactions: TransactionWithCategory[], monthKey: string): Promise<void> {
-  const csv = buildCsv(transactions);
-  const filename = `budgetpro-transactions-${formatMonthShort(monthKey).replace(' ', '-').toLowerCase()}.csv`;
+export async function exportTransactionsToXlsx(transactions: TransactionWithCategory[]): Promise<void> {
+  const wb = buildWorkbook(transactions);
+  const stamp = new Date().toISOString().slice(0, 10);
+  const filename = `BudgetPro-Transactions-${stamp}.xlsx`;
 
   if (Platform.OS === 'web') {
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const arrayBuffer = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
+    const blob = new Blob([arrayBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -39,13 +39,15 @@ export async function exportTransactionsToCsv(transactions: TransactionWithCateg
     return;
   }
 
-  const { File, Paths } = await import('expo-file-system');
+  const base64 = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
+  const FileSystem = await import('expo-file-system/legacy');
   const Sharing = await import('expo-sharing');
-  const file = new File(Paths.cache, filename);
-  if (file.exists) file.delete();
-  file.create();
-  file.write(csv);
+  const fileUri = `${FileSystem.cacheDirectory}${filename}`;
+  await FileSystem.writeAsStringAsync(fileUri, base64, { encoding: FileSystem.EncodingType.Base64 });
   if (await Sharing.isAvailableAsync()) {
-    await Sharing.shareAsync(file.uri, { mimeType: 'text/csv', dialogTitle: 'Export transactions' });
+    await Sharing.shareAsync(fileUri, {
+      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      dialogTitle: 'Export transactions',
+    });
   }
 }

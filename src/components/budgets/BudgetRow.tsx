@@ -1,9 +1,10 @@
-import { Feather } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { CategoryGlyph } from '@/components/ui/CategoryGlyph';
 import { ProgressBar } from '@/components/ui/ProgressBar';
+import { Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { formatCurrency } from '@/lib/format/currency';
 import type { Category } from '@/types/database';
@@ -30,7 +31,9 @@ export function BudgetRow({ category, spent, limit, onSave }: Props) {
     <View style={styles.row}>
       <View style={styles.topLine}>
         <View style={styles.nameWrap}>
-          <Feather name={(category.icon as any) ?? 'circle'} size={16} color={category.color ?? theme.text} />
+          <View style={[styles.iconWrap, { backgroundColor: theme.backgroundSelected }]}>
+            <CategoryGlyph name={category.name} size={15} color={theme.primaryDark} />
+          </View>
           <ThemedText type="smallBold">{category.name}</ThemedText>
         </View>
         {editing ? (
@@ -41,12 +44,12 @@ export function BudgetRow({ category, spent, limit, onSave }: Props) {
             onBlur={commit}
             onSubmitEditing={commit}
             keyboardType="numeric"
-            style={[styles.input, { color: theme.text, borderColor: theme.border }]}
+            style={[styles.input, { color: theme.text, borderColor: theme.border, fontFamily: 'IBMPlexMono_400Regular' }]}
           />
         ) : (
           <Pressable onPress={() => setEditing(true)}>
-            <ThemedText type="small" themeColor="textSecondary">
-              {limit > 0 ? `Budget ${formatCurrency(limit)}` : 'Set budget'}
+            <ThemedText type="amountSmall" themeColor="textSecondary">
+              {limit > 0 ? `${formatCurrency(limit)}` : 'Set budget'}
             </ThemedText>
           </Pressable>
         )}
@@ -54,8 +57,8 @@ export function BudgetRow({ category, spent, limit, onSave }: Props) {
       {limit > 0 ? (
         <>
           <ProgressBar ratio={spent / limit} />
-          <ThemedText type="small" themeColor="textSecondary">
-            {formatCurrency(spent)} of {formatCurrency(limit)}
+          <ThemedText type="amountSmall" themeColor="textSecondary">
+            {formatCurrency(spent)} / {formatCurrency(limit)}
           </ThemedText>
         </>
       ) : null}
@@ -67,5 +70,6 @@ const styles = StyleSheet.create({
   row: { gap: 6, paddingVertical: 10 },
   topLine: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   nameWrap: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  iconWrap: { width: 28, height: 28, borderRadius: Radius.sm - 1, alignItems: 'center', justifyContent: 'center' },
   input: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4, width: 90, textAlign: 'right' },
 });
