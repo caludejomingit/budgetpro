@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "PaisaTrack",
+    "slug": "paisatrack",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "paisatrack",
+    "userInterfaceStyle": "automatic",
+    "android": {
+      "package": "com.jominclaude.paisatrack",
+      "adaptiveIcon": {
+        "backgroundColor": "#fcfcfb",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#fcfcfb",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 120
+        }
+      ],
+      "@react-native-community/datetimepicker"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c004dc5b-0ed4-4da7-8dda-53d155ed1f92"
+      }
+    },
+    "owner": "jominclaude"
+  }
+}
