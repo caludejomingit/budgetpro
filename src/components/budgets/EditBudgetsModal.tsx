@@ -61,7 +61,7 @@ export function EditBudgetsModal({ visible, categories, limitByCategoryId, savin
                   keyboardType="numeric"
                   value={drafts.get(c.id) ?? '0'}
                   onChangeText={(v) => setDraft(c.id, v)}
-                  style={[styles.input, { color: theme.text, borderColor: theme.border, backgroundColor: theme.background }]}
+                  style={[styles.input, { color: theme.text, borderColor: theme.border, backgroundColor: theme.backgroundSelected }]}
                 />
               </View>
             ))}
@@ -88,7 +88,16 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   iconWrap: { width: 30, height: 30, borderRadius: Radius.sm - 1, alignItems: 'center', justifyContent: 'center' },
   name: { flex: 1, fontWeight: '600' },
-  input: { width: 100, borderWidth: 1, borderRadius: Radius.sm - 1, paddingHorizontal: 10, paddingVertical: 8, fontFamily: 'IBMPlexMono_400Regular', textAlign: 'right' },
+  input: {
+    width: 108,
+    borderWidth: 1,
+    borderRadius: Radius.sm - 1,
+    paddingHorizontal: 10,
+    paddingVertical: 9,
+    fontFamily: 'IBMPlexMono_600SemiBold',
+    fontSize: 16,
+    textAlign: 'right',
+  },
   actions: { flexDirection: 'row', gap: 10, paddingHorizontal: 22, paddingTop: 14, paddingBottom: 18 },
   actionFlex: { flex: 1 },
 });

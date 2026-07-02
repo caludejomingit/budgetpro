@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { useMemo } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -12,6 +12,7 @@ import { useTransactions } from '@/hooks/useTransactions';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { buildTipsPool, shuffle } from '@/lib/insights/savingsTips';
 import { useMonth } from '@/lib/state/MonthContext';
+import { confirmAction } from '@/lib/utils/confirm';
 
 export default function ProfileScreen() {
   const theme = useTheme();
@@ -33,10 +34,7 @@ export default function ProfileScreen() {
   }, [transactions]);
 
   const onLogout = () => {
-    Alert.alert('Log out', `Log out of BudgetPro, ${displayName}?`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Log out', style: 'destructive', onPress: signOut },
-    ]);
+    confirmAction('Log out', `Log out of BudgetPro, ${displayName}?`, 'Log out', signOut, true);
   };
 
   return (

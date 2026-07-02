@@ -37,7 +37,11 @@ from (values
   ('Travel',               'expense', 'map-pin',       '#A65D57'),
   ('Pets',                 'expense', 'feather',       '#598C6E'),
   ('Childcare',            'expense', 'user',          '#8C7548'),
-  ('Gifts & Donations',    'expense', 'gift',          '#7E6BA6')
+  ('Gifts & Donations',    'expense', 'gift',          '#7E6BA6'),
+  ('Mobile & Internet',    'expense', 'smartphone',    '#3D6B5C'),
+  ('Medicine & Pharmacy',  'expense', 'plus-square',   '#8E5B4A'),
+  ('EMI & Loans',          'expense', 'file-text',     '#5B7A6E'),
+  ('Domestic Help',        'expense', 'users',         '#7A5D3F')
 ) as v(name, type, icon, color)
 where not exists (
   select 1 from public.categories c

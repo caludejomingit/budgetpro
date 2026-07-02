@@ -83,7 +83,7 @@ const styles = {
     fontSize: 22,
   },
   amountSmall: {
-    fontFamily: Fonts.mono,
-    fontSize: 13,
+    fontFamily: Fonts.monoBold,
+    fontSize: 14.5,
   },
 } as const;

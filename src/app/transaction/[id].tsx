@@ -1,13 +1,14 @@
 import { Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, Alert, Pressable, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { TransactionForm, type TransactionFormValues } from '@/components/transactions/TransactionForm';
 import { useTheme } from '@/hooks/use-theme';
 import { useDeleteTransaction, useUpdateTransaction } from '@/hooks/useTransactions';
 import { fetchTransactionById } from '@/lib/api/transactions';
+import { confirmAction } from '@/lib/utils/confirm';
 
 export default function EditTransactionScreen() {
   const theme = useTheme();
@@ -35,17 +36,10 @@ export default function EditTransactionScreen() {
   };
 
   const onDelete = () => {
-    Alert.alert('Delete transaction', 'This can\'t be undone.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          await deleteTransaction.mutateAsync(id);
-          router.back();
-        },
-      },
-    ]);
+    confirmAction('Delete transaction', "This can't be undone.", 'Delete', async () => {
+      await deleteTransaction.mutateAsync(id);
+      router.back();
+    }, true);
   };
 
   if (isLoading || !transaction) {

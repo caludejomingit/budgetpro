@@ -10,12 +10,12 @@ import { Platform } from 'react-native';
 export const Colors = {
   light: {
     text: '#1C2B22', // ink
-    background: '#F6F9F4', // bg
+    background: '#FFFFFF', // page bg — white, cards separated by border + shadow only
     backgroundElement: '#FFFFFF', // surface
     backgroundSelected: '#EEF4EA', // surface-alt
     textSecondary: '#3E4A41',
     textMuted: '#6E7C73', // muted
-    border: '#E1E8DC',
+    border: '#DDE6DF',
     chartSurface: '#FFFFFF',
     gridline: '#E1E8DC',
     primary: '#1E6B4E',

@@ -188,8 +188,11 @@ export default function ChatScreen() {
 
         <View style={styles.quickRow}>
           {QUICK_REPLIES.map((q) => (
-            <Pressable key={q} onPress={() => send(q)} style={[styles.quickChip, { backgroundColor: theme.primaryLight }]}>
-              <ThemedText type="small" style={{ color: theme.primaryDark, fontWeight: '600' }}>
+            <Pressable
+              key={q}
+              onPress={() => send(q)}
+              style={[styles.quickChip, { backgroundColor: theme.backgroundSelected, borderColor: theme.primary }]}>
+              <ThemedText type="small" style={{ color: theme.primaryDark, fontWeight: '700' }}>
                 {q}
               </ThemedText>
             </Pressable>
@@ -222,7 +225,7 @@ const styles = StyleSheet.create({
   msgRowBot: { justifyContent: 'flex-start' },
   bubble: { maxWidth: '80%', paddingHorizontal: 14, paddingVertical: 10, borderRadius: Radius.md },
   quickRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 20, paddingBottom: 10 },
-  quickChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20 },
+  quickChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1.5 },
   inputRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 20, paddingBottom: 16 },
   inputFlex: { flex: 1 },
   sendBtn: { height: 48, paddingHorizontal: 18, borderRadius: Radius.md, alignItems: 'center', justifyContent: 'center' },
