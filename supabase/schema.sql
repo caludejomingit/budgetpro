@@ -73,22 +73,40 @@ create policy "Delete own categories"
   using (auth.uid() = user_id);
 
 -- Seed default categories (user_id left null = visible to every user)
--- Colors are the validated categorical palette from the dataviz skill, in fixed
--- slot order (blue, aqua, yellow, green, violet, red, magenta, orange); the
--- catch-all "Other" categories use the muted/gray slot instead of a bright hue.
+-- Colors cycle through the validated categorical palette from the dataviz
+-- skill (blue, aqua, yellow, green, violet, red, magenta, orange) as a
+-- per-category identity color for icons/badges — NOT a simultaneous chart
+-- palette, so reuse across >8 categories is fine here. Chart components that
+-- render many categories at once (e.g. the spending donut) separately fold
+-- the long tail beyond the top 7 into a muted "Other" slice, per the
+-- categorical-palette rule of never exceeding ~8 distinguishable series.
+-- Catch-all "Other"/"Miscellaneous" categories use the muted/gray slot.
 insert into public.categories (name, type, icon, color, is_default) values
-  ('Salary',         'income',  'briefcase',       '#0F8A5B', true),
-  ('Freelance',      'income',  'trending-up',     '#2C6FBE', true),
-  ('Other Income',   'income',  'plus-circle',     '#6E7C73', true),
-  ('Food',           'expense', 'coffee',          '#0F8A5B', true),
-  ('Transport',      'expense', 'navigation',      '#2C6FBE', true),
-  ('Housing/Rent',   'expense', 'home',            '#C9A03D', true),
-  ('Utilities',      'expense', 'zap',             '#8B4FB0', true),
-  ('Shopping',       'expense', 'shopping-bag',    '#1B9E9E', true),
-  ('Entertainment',  'expense', 'film',            '#C97452', true),
-  ('Health',         'expense', 'heart',           '#C2478B', true),
-  ('Education',      'expense', 'book',            '#3B6FA5', true),
-  ('Other Expense',  'expense', 'more-horizontal', '#6E7C73', true);
+  ('Salary',              'income',  'briefcase',      '#0F8A5B', true),
+  ('Freelance',           'income',  'trending-up',    '#2C6FBE', true),
+  ('Business',            'income',  'target',         '#C9A03D', true),
+  ('Investments',         'income',  'bar-chart-2',    '#8B4FB0', true),
+  ('Other Income',        'income',  'plus-circle',    '#6E7C73', true),
+  ('Groceries',           'expense', 'shopping-cart',  '#0F8A5B', true),
+  ('Bills & Utilities',   'expense', 'zap',             '#2C6FBE', true),
+  ('Food & Dining',       'expense', 'coffee',          '#C9A03D', true),
+  ('Transport',           'expense', 'navigation',      '#8B4FB0', true),
+  ('Fuel',                'expense', 'droplet',         '#1B9E9E', true),
+  ('Shopping',            'expense', 'shopping-bag',    '#C97452', true),
+  ('Entertainment',       'expense', 'film',            '#C2478B', true),
+  ('Health',              'expense', 'heart',           '#3B6FA5', true),
+  ('Fitness',             'expense', 'activity',        '#0F8A5B', true),
+  ('Personal Care',       'expense', 'smile',           '#2C6FBE', true),
+  ('Rent',                'expense', 'home',            '#C9A03D', true),
+  ('Home & Maintenance',  'expense', 'tool',            '#8B4FB0', true),
+  ('Subscriptions',       'expense', 'refresh-cw',      '#1B9E9E', true),
+  ('Insurance',           'expense', 'shield',          '#C97452', true),
+  ('Education',           'expense', 'book',            '#C2478B', true),
+  ('Travel',              'expense', 'map-pin',         '#3B6FA5', true),
+  ('Pets',                'expense', 'feather',         '#0F8A5B', true),
+  ('Childcare',           'expense', 'user',            '#2C6FBE', true),
+  ('Gifts & Donations',   'expense', 'gift',            '#C9A03D', true),
+  ('Miscellaneous',       'expense', 'grid',            '#6E7C73', true);
 
 -- ============================================================
 -- 3. transactions

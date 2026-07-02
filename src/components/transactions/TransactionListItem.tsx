@@ -10,9 +10,11 @@ import type { TransactionWithCategory } from '@/types/database';
 
 interface Props {
   transaction: TransactionWithCategory;
+  /** True when embedded inside a Card that already has its own padding. */
+  inset?: boolean;
 }
 
-export function TransactionListItem({ transaction }: Props) {
+export function TransactionListItem({ transaction, inset }: Props) {
   const theme = useTheme();
   const isIncome = transaction.type === 'income';
   const color = transaction.category?.color ?? theme.textMuted;
@@ -20,7 +22,7 @@ export function TransactionListItem({ transaction }: Props) {
   const amountColor = isIncome ? theme.success : theme.danger;
 
   return (
-    <Pressable style={styles.row} onPress={() => router.push(`/transaction/${transaction.id}`)}>
+    <Pressable style={[styles.row, !inset && styles.rowPadded]} onPress={() => router.push(`/transaction/${transaction.id}`)}>
       <View style={[styles.iconWrap, { backgroundColor: `${color}22` }]}>
         <Feather name={(transaction.category?.icon as any) ?? 'circle'} size={18} color={color} />
       </View>
@@ -42,6 +44,7 @@ export function TransactionListItem({ transaction }: Props) {
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12 },
+  rowPadded: { paddingHorizontal: 20 },
   iconWrap: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   middle: { flex: 1, gap: 2 },
 });

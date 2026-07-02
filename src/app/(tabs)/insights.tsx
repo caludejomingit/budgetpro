@@ -1,19 +1,22 @@
+import { Feather } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ThemedText } from '@/components/themed-text';
 import { BudgetVsActualChart } from '@/components/charts/BudgetVsActualChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
+import { RotatingTipNote } from '@/components/insights/RotatingTipNote';
+import { ThemedText } from '@/components/themed-text';
 import { MonthPicker } from '@/components/transactions/MonthPicker';
 import { Card } from '@/components/ui/Card';
-import { TipCard } from '@/components/insights/TipCard';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useTheme } from '@/hooks/use-theme';
 import { useBudgets } from '@/hooks/useBudgets';
 import { useMonthlySummary } from '@/hooks/useMonthlySummary';
 import { useTransactions } from '@/hooks/useTransactions';
-import { generateSavingsTips } from '@/lib/insights/savingsTips';
+import { GENERAL_SAVINGS_TIPS } from '@/lib/constants/generalTips';
 import { currentMonthKey, daysRemainingInMonth, previousMonthKey, type MonthKey } from '@/lib/format/date';
+import { generateSavingsTips } from '@/lib/insights/savingsTips';
 
 export default function InsightsScreen() {
   const theme = useTheme();
@@ -55,7 +58,33 @@ export default function InsightsScreen() {
   return (
     <SafeAreaView style={[styles.flex, { backgroundColor: theme.background }]} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
+        <ScreenHeader eyebrow="Notes from your numbers" title="What your diary is telling you" accent="telling you" />
         <MonthPicker monthKey={monthKey} onChange={setMonthKey} />
+
+        <Card style={styles.card}>
+          <ThemedText type="smallBold">This month&apos;s notes</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary" style={styles.cardSubtitle}>
+            Written from your own numbers, refreshes every 30s
+          </ThemedText>
+          <RotatingTipNote tips={tips} />
+        </Card>
+
+        <Card style={styles.card}>
+          <ThemedText type="smallBold">Save more, gently</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary" style={styles.cardSubtitle}>
+            A few habits worth trying
+          </ThemedText>
+          <View style={styles.habitList}>
+            {GENERAL_SAVINGS_TIPS.slice(0, 3).map((habit) => (
+              <View key={habit} style={styles.habitRow}>
+                <Feather name="check-circle" size={15} color={theme.primary} style={styles.habitIcon} />
+                <ThemedText type="small" style={styles.habitText}>
+                  {habit}
+                </ThemedText>
+              </View>
+            ))}
+          </View>
+        </Card>
 
         <Card style={styles.card}>
           <ThemedText type="smallBold" style={styles.sectionTitle}>
@@ -70,17 +99,6 @@ export default function InsightsScreen() {
           </ThemedText>
           <BudgetVsActualChart rows={budgetRows} />
         </Card>
-
-        <View style={styles.tipsSection}>
-          <ThemedText type="smallBold" style={styles.sectionTitle}>
-            Tips for you
-          </ThemedText>
-          <View style={styles.tipsList}>
-            {tips.map((tip) => (
-              <TipCard key={tip.id} tip={tip} />
-            ))}
-          </View>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -89,8 +107,11 @@ export default function InsightsScreen() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { padding: 20, gap: 16, paddingBottom: 40 },
-  card: { gap: 8 },
+  card: { gap: 4 },
+  cardSubtitle: { marginBottom: 8 },
   sectionTitle: { marginBottom: 4 },
-  tipsSection: { gap: 8 },
-  tipsList: { gap: 10 },
+  habitList: { gap: 10, marginTop: 4 },
+  habitRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
+  habitIcon: { marginTop: 2 },
+  habitText: { flex: 1, lineHeight: 19 },
 });

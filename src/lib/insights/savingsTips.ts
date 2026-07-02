@@ -28,7 +28,7 @@ export interface TipInput {
   daysRemainingInMonth: number;
 }
 
-const DISCRETIONARY_CATEGORY_NAMES = new Set(['Food', 'Shopping', 'Entertainment']);
+const DISCRETIONARY_CATEGORY_NAMES = new Set(['Food & Dining', 'Shopping', 'Entertainment']);
 
 function pct(from: number, to: number): number {
   if (from === 0) return 0;
