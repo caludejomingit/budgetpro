@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { CategoryGlyph } from '@/components/ui/CategoryGlyph';
@@ -13,19 +12,10 @@ interface Props {
   category: Category;
   spent: number;
   limit: number;
-  onSave: (limit: number) => void;
 }
 
-export function BudgetRow({ category, spent, limit, onSave }: Props) {
+export function BudgetRow({ category, spent, limit }: Props) {
   const theme = useTheme();
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(limit > 0 ? String(limit) : '');
-
-  const commit = () => {
-    const value = Number(draft) || 0;
-    onSave(value);
-    setEditing(false);
-  };
 
   return (
     <View style={styles.row}>
@@ -36,32 +26,11 @@ export function BudgetRow({ category, spent, limit, onSave }: Props) {
           </View>
           <ThemedText type="smallBold">{category.name}</ThemedText>
         </View>
-        {editing ? (
-          <TextInput
-            autoFocus
-            value={draft}
-            onChangeText={setDraft}
-            onBlur={commit}
-            onSubmitEditing={commit}
-            keyboardType="numeric"
-            style={[styles.input, { color: theme.text, borderColor: theme.border, fontFamily: 'IBMPlexMono_400Regular' }]}
-          />
-        ) : (
-          <Pressable onPress={() => setEditing(true)}>
-            <ThemedText type="amountSmall" themeColor="textSecondary">
-              {limit > 0 ? `${formatCurrency(limit)}` : 'Set budget'}
-            </ThemedText>
-          </Pressable>
-        )}
+        <ThemedText type="amountSmall" themeColor="textSecondary">
+          {formatCurrency(spent)} / {formatCurrency(limit)}
+        </ThemedText>
       </View>
-      {limit > 0 ? (
-        <>
-          <ProgressBar ratio={spent / limit} />
-          <ThemedText type="amountSmall" themeColor="textSecondary">
-            {formatCurrency(spent)} / {formatCurrency(limit)}
-          </ThemedText>
-        </>
-      ) : null}
+      <ProgressBar ratio={limit > 0 ? spent / limit : 0} />
     </View>
   );
 }
@@ -71,5 +40,4 @@ const styles = StyleSheet.create({
   topLine: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   nameWrap: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   iconWrap: { width: 28, height: 28, borderRadius: Radius.sm - 1, alignItems: 'center', justifyContent: 'center' },
-  input: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4, width: 90, textAlign: 'right' },
 });

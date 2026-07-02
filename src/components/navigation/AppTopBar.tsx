@@ -1,6 +1,7 @@
 import { Feather } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -10,9 +11,13 @@ import { exportTransactionsToXlsx } from '@/lib/export/exportTransactions';
 import { formatMonthShort } from '@/lib/format/date';
 import { useMonth } from '@/lib/state/MonthContext';
 
-export function AppTopBar() {
+interface Props {
+  onMenuPress: () => void;
+}
+
+export function AppTopBar({ onMenuPress }: Props) {
   const insets = useSafeAreaInsets();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { viewMonth, shiftMonth } = useMonth();
   const { data: transactions } = useTransactions(viewMonth);
   const [isExporting, setIsExporting] = useState(false);
@@ -30,16 +35,12 @@ export function AppTopBar() {
     }
   };
 
-  const onAvatarPress = () => {
-    Alert.alert('Log out', `Log out of BudgetPro, ${displayName}?`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Log out', style: 'destructive', onPress: signOut },
-    ]);
-  };
-
   return (
     <View style={[styles.bar, { paddingTop: insets.top + 12 }]}>
       <View style={styles.brand}>
+        <Pressable onPress={onMenuPress} style={styles.menuBtn}>
+          <Feather name="menu" size={18} color="#EAF4EE" />
+        </Pressable>
         <View style={styles.mark}>
           <Feather name="trending-up" size={17} color="#EAF4EE" />
         </View>
@@ -68,7 +69,7 @@ export function AppTopBar() {
             <Feather name="chevron-right" size={13} color="#EAF4EE" />
           </Pressable>
         </View>
-        <Pressable onPress={onAvatarPress} style={styles.avatar}>
+        <Pressable onPress={() => router.push('/(tabs)/profile' as never)} style={styles.avatar}>
           <ThemedText type="subtitle" style={styles.avatarText}>
             {initial}
           </ThemedText>
@@ -89,6 +90,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   brand: { flexDirection: 'row', alignItems: 'center', gap: 9, flexShrink: 1 },
+  menuBtn: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
   mark: { width: 30, height: 30, borderRadius: 9, backgroundColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center' },
   t1: { color: '#EAF4EE', fontSize: 14.5, lineHeight: 17 },
   t2: { color: '#B9D6C4', fontSize: 10.5, lineHeight: 13 },
