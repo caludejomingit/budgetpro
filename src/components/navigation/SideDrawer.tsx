@@ -39,6 +39,10 @@ export function SideDrawer({ visible, onClose }: Props) {
 
   const go = (name: string) => {
     onClose();
+    if (name === 'chat') {
+      router.push('/chat' as never);
+      return;
+    }
     router.push(`/(tabs)/${name === 'index' ? '' : name}` as never);
   };
 

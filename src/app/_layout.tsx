@@ -36,6 +36,7 @@ function RootNavigator() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="transaction/new" options={{ presentation: 'modal', headerShown: true, title: 'Add Transaction' }} />
       <Stack.Screen name="transaction/[id]" options={{ presentation: 'modal', headerShown: true, title: 'Edit Transaction' }} />
+      <Stack.Screen name="chat" options={{ presentation: 'modal', headerShown: false }} />
     </Stack>
   );
 }

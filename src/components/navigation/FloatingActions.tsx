@@ -15,7 +15,7 @@ export function FloatingActions() {
   return (
     <>
       <Pressable
-        onPress={() => router.push('/(tabs)/chat' as never)}
+        onPress={() => router.push('/chat' as never)}
         style={[styles.btn, { bottom: base + 88, width: 56, height: 56, borderRadius: 28, backgroundColor: theme.primary }]}>
         <Feather name="message-circle" size={22} color="#ffffff" />
       </Pressable>

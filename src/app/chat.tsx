@@ -1,11 +1,12 @@
+import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { Input } from '@/components/ui/Input';
-import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useBudgets, useUpsertBudget } from '@/hooks/useBudgets';
@@ -141,7 +142,19 @@ export default function ChatScreen() {
   const clearChat = () => persist([]);
 
   return (
-    <SafeAreaView style={[styles.flex, { backgroundColor: theme.background }]} edges={[]}>
+    <SafeAreaView style={[styles.flex, { backgroundColor: theme.background }]} edges={['top']}>
+      <View style={[styles.header, { borderBottomColor: theme.border }]}>
+        <View style={styles.headerTitleWrap}>
+          <ThemedText type="subtitle">Budget Chat</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            Plan your budget, together
+          </ThemedText>
+        </View>
+        <Pressable onPress={() => router.back()} style={[styles.closeBtn, { backgroundColor: theme.backgroundSelected }]}>
+          <Feather name="x" size={18} color={theme.text} />
+        </Pressable>
+      </View>
+
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <FlatList
           ref={listRef}
@@ -149,27 +162,27 @@ export default function ChatScreen() {
           keyExtractor={(_, i) => String(i)}
           contentContainerStyle={styles.list}
           ListHeaderComponent={
-            <View>
-              <ScreenHeader eyebrow="Talk it through" title="Plan your budget, together" accent="budget" />
-              <View style={styles.headRow}>
-                <View style={styles.flexShrink}>
-                  <ThemedText type="smallBold">BudgetPro assistant</ThemedText>
-                  <ThemedText type="small" themeColor="textSecondary">
-                    Ask about your spending, get a suggested budget, or update one right here
-                  </ThemedText>
-                </View>
-                <Pressable onPress={clearChat}>
-                  <ThemedText type="small" themeColor="textMuted">
-                    Clear chat
-                  </ThemedText>
-                </Pressable>
-              </View>
-              {messages.length === 0 ? (
-                <ThemedText type="small" themeColor="textMuted" style={styles.emptyHint}>
-                  Ask me things like &quot;how am I doing this month?&quot; or &quot;set budget for Rent to 15000&quot;.
+            <View style={styles.headRow}>
+              <View style={styles.flexShrink}>
+                <ThemedText type="smallBold">BudgetPro assistant</ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">
+                  Ask about your spending, get a suggested budget, or update one right here
                 </ThemedText>
-              ) : null}
+              </View>
+              <Pressable onPress={clearChat} style={[styles.clearBtn, { borderColor: theme.danger }]}>
+                <Feather name="trash-2" size={12} color={theme.danger} />
+                <ThemedText type="small" style={{ color: theme.danger, fontWeight: '700' }}>
+                  Clear chat
+                </ThemedText>
+              </Pressable>
             </View>
+          }
+          ListFooterComponent={
+            messages.length === 0 ? (
+              <ThemedText type="small" themeColor="textMuted" style={styles.emptyHint}>
+                Ask me things like &quot;how am I doing this month?&quot; or &quot;set budget for Rent to 15000&quot;.
+              </ThemedText>
+            ) : null
           }
           renderItem={({ item }) => (
             <View style={[styles.msgRow, item.role === 'user' ? styles.msgRowUser : styles.msgRowBot]}>
@@ -199,7 +212,7 @@ export default function ChatScreen() {
           ))}
         </View>
 
-        <View style={styles.inputRow}>
+        <View style={[styles.inputRow, { paddingBottom: 16 }]}>
           <View style={styles.inputFlex}>
             <Input placeholder="Ask about your budget…" value={input} onChangeText={setInput} onSubmitEditing={() => send(input)} returnKeyType="send" />
           </View>
@@ -216,9 +229,20 @@ export default function ChatScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+  },
+  headerTitleWrap: { gap: 1 },
+  closeBtn: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
   list: { padding: 20, paddingBottom: 12, gap: 10 },
   headRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, gap: 12 },
   flexShrink: { flexShrink: 1 },
+  clearBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, borderWidth: 1, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 6 },
   emptyHint: { textAlign: 'center', paddingVertical: 24 },
   msgRow: { flexDirection: 'row' },
   msgRowUser: { justifyContent: 'flex-end' },
@@ -226,7 +250,7 @@ const styles = StyleSheet.create({
   bubble: { maxWidth: '80%', paddingHorizontal: 14, paddingVertical: 10, borderRadius: Radius.md },
   quickRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 20, paddingBottom: 10 },
   quickChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1.5 },
-  inputRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 20, paddingBottom: 16 },
+  inputRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 20 },
   inputFlex: { flex: 1 },
   sendBtn: { height: 48, paddingHorizontal: 18, borderRadius: Radius.md, alignItems: 'center', justifyContent: 'center' },
 });

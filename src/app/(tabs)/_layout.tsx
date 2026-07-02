@@ -25,7 +25,6 @@ export default function TabsLayout() {
         <Tabs.Screen name="transactions" options={{ title: 'Transactions' }} />
         <Tabs.Screen name="insights" options={{ title: 'Insights' }} />
         <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
-        <Tabs.Screen name="chat" options={{ title: 'Budget Chat', href: null }} />
       </Tabs>
       <FloatingActions />
       <SideDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
