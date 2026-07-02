@@ -1,7 +1,7 @@
 import { ActivityIndicator, Pressable, StyleSheet, type PressableProps } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { ChartColors } from '@/constants/theme';
+import { Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 interface ButtonProps extends Omit<PressableProps, 'style'> {
@@ -15,7 +15,7 @@ export function Button({ label, variant = 'primary', loading, disabled, ...rest 
   const isDisabled = disabled || loading;
 
   const backgroundColor =
-    variant === 'primary' ? ChartColors.light.accent : variant === 'danger' ? ChartColors.light.expense : theme.backgroundElement;
+    variant === 'primary' ? theme.primary : variant === 'danger' ? theme.danger : theme.backgroundSelected;
   const textColor = variant === 'secondary' ? theme.text : '#ffffff';
 
   return (
@@ -27,7 +27,13 @@ export function Button({ label, variant = 'primary', loading, disabled, ...rest 
         { backgroundColor, opacity: isDisabled ? 0.6 : pressed ? 0.85 : 1 },
       ]}
       {...rest}>
-      {loading ? <ActivityIndicator color={textColor} /> : <ThemedText style={{ color: textColor, fontWeight: '600' }}>{label}</ThemedText>}
+      {loading ? (
+        <ActivityIndicator color={textColor} />
+      ) : (
+        <ThemedText type="smallBold" style={{ color: textColor, fontSize: 15 }}>
+          {label}
+        </ThemedText>
+      )}
     </Pressable>
   );
 }
@@ -35,7 +41,7 @@ export function Button({ label, variant = 'primary', loading, disabled, ...rest 
 const styles = StyleSheet.create({
   base: {
     height: 50,
-    borderRadius: 12,
+    borderRadius: Radius.md,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 16,

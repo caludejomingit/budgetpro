@@ -77,18 +77,18 @@ create policy "Delete own categories"
 -- slot order (blue, aqua, yellow, green, violet, red, magenta, orange); the
 -- catch-all "Other" categories use the muted/gray slot instead of a bright hue.
 insert into public.categories (name, type, icon, color, is_default) values
-  ('Salary',         'income',  'briefcase',       '#2a78d6', true),
-  ('Freelance',      'income',  'trending-up',     '#1baf7a', true),
-  ('Other Income',   'income',  'plus-circle',     '#898781', true),
-  ('Food',           'expense', 'coffee',          '#2a78d6', true),
-  ('Transport',      'expense', 'navigation',      '#1baf7a', true),
-  ('Housing/Rent',   'expense', 'home',            '#eda100', true),
-  ('Utilities',      'expense', 'zap',              '#008300', true),
-  ('Shopping',       'expense', 'shopping-bag',    '#4a3aa7', true),
-  ('Entertainment',  'expense', 'film',            '#e34948', true),
-  ('Health',         'expense', 'heart',           '#e87ba4', true),
-  ('Education',      'expense', 'book',            '#eb6834', true),
-  ('Other Expense',  'expense', 'more-horizontal', '#898781', true);
+  ('Salary',         'income',  'briefcase',       '#0F8A5B', true),
+  ('Freelance',      'income',  'trending-up',     '#2C6FBE', true),
+  ('Other Income',   'income',  'plus-circle',     '#6E7C73', true),
+  ('Food',           'expense', 'coffee',          '#0F8A5B', true),
+  ('Transport',      'expense', 'navigation',      '#2C6FBE', true),
+  ('Housing/Rent',   'expense', 'home',            '#C9A03D', true),
+  ('Utilities',      'expense', 'zap',             '#8B4FB0', true),
+  ('Shopping',       'expense', 'shopping-bag',    '#1B9E9E', true),
+  ('Entertainment',  'expense', 'film',            '#C97452', true),
+  ('Health',         'expense', 'heart',           '#C2478B', true),
+  ('Education',      'expense', 'book',            '#3B6FA5', true),
+  ('Other Expense',  'expense', 'more-horizontal', '#6E7C73', true);
 
 -- ============================================================
 -- 3. transactions

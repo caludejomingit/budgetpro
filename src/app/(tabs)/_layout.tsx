@@ -1,7 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
 
-import { ChartColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useAuth } from '@/lib/auth/AuthContext';
 
@@ -15,9 +14,9 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: ChartColors.light.accent,
+        tabBarActiveTintColor: theme.primary,
         tabBarInactiveTintColor: theme.textMuted,
-        tabBarStyle: { backgroundColor: theme.background, borderTopColor: theme.border },
+        tabBarStyle: { backgroundColor: theme.backgroundElement, borderTopColor: theme.border },
       }}>
       <Tabs.Screen
         name="index"

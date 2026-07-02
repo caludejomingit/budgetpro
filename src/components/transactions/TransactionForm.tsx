@@ -10,7 +10,7 @@ import { z } from 'zod';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { ChartColors } from '@/constants/theme';
+import { Radius } from '@/constants/theme';
 import { useCategories } from '@/hooks/useCategories';
 import { useTheme } from '@/hooks/use-theme';
 import type { CategoryType, TransactionWithCategory } from '@/types/database';
@@ -68,13 +68,13 @@ export function TransactionForm({ initialValues, onSubmit, submitLabel }: Props)
       <View style={styles.typeToggle}>
         {(['expense', 'income'] as const).map((t) => {
           const active = type === t;
-          const color = t === 'income' ? ChartColors.light.income : ChartColors.light.expense;
+          const color = t === 'income' ? theme.success : theme.danger;
           return (
             <Pressable
               key={t}
               onPress={() => setType(t)}
-              style={[styles.typeButton, { backgroundColor: active ? color : theme.backgroundElement }]}>
-              <ThemedText style={{ color: active ? '#ffffff' : theme.text, fontWeight: '600' }}>
+              style={[styles.typeButton, { backgroundColor: active ? color : theme.backgroundSelected }]}>
+              <ThemedText type="smallBold" style={{ color: active ? '#ffffff' : theme.text }}>
                 {t === 'income' ? 'Income' : 'Expense'}
               </ThemedText>
             </Pressable>
@@ -108,7 +108,7 @@ export function TransactionForm({ initialValues, onSubmit, submitLabel }: Props)
             <Pressable
               key={c.id}
               onPress={() => setValue('categoryId', c.id, { shouldValidate: true })}
-              style={[styles.categoryChip, { backgroundColor: active ? `${c.color}22` : theme.backgroundElement, borderColor: active ? c.color ?? theme.border : 'transparent' }]}>
+              style={[styles.categoryChip, { backgroundColor: active ? `${c.color}22` : theme.backgroundSelected, borderColor: active ? c.color ?? theme.border : 'transparent' }]}>
               <Feather name={(c.icon as any) ?? 'circle'} size={16} color={c.color ?? theme.text} />
               <ThemedText type="small">{c.name}</ThemedText>
             </Pressable>
@@ -116,7 +116,7 @@ export function TransactionForm({ initialValues, onSubmit, submitLabel }: Props)
         })}
       </View>
       {errors.categoryId ? (
-        <ThemedText type="small" style={{ color: ChartColors.light.expense, marginTop: 4 }}>
+        <ThemedText type="small" style={{ color: theme.danger, marginTop: 4 }}>
           {errors.categoryId.message}
         </ThemedText>
       ) : null}
@@ -126,7 +126,7 @@ export function TransactionForm({ initialValues, onSubmit, submitLabel }: Props)
       </ThemedText>
       <Pressable
         onPress={() => setShowDatePicker(true)}
-        style={[styles.dateButton, { backgroundColor: theme.backgroundElement }]}>
+        style={[styles.dateButton, { backgroundColor: theme.backgroundSelected }]}>
         <Feather name="calendar" size={16} color={theme.text} />
         <ThemedText>{format(parseISO(occurredOn), 'd MMM yyyy')}</ThemedText>
       </Pressable>
@@ -160,7 +160,7 @@ export function TransactionForm({ initialValues, onSubmit, submitLabel }: Props)
 const styles = StyleSheet.create({
   content: { padding: 20, paddingBottom: 40 },
   typeToggle: { flexDirection: 'row', gap: 8, marginBottom: 16 },
-  typeButton: { flex: 1, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  typeButton: { flex: 1, height: 44, borderRadius: Radius.md, alignItems: 'center', justifyContent: 'center' },
   label: { marginBottom: 8, marginTop: 4 },
   categoryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 },
   categoryChip: {
@@ -172,6 +172,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1.5,
   },
-  dateButton: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 50, borderRadius: 12, paddingHorizontal: 14, marginBottom: 16 },
+  dateButton: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 50, borderRadius: Radius.md, paddingHorizontal: 14, marginBottom: 16 },
   spacer: { height: 8 },
 });

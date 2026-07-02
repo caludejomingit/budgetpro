@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { ChartColors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { formatCurrency } from '@/lib/format/currency';
 import { formatDayLabel } from '@/lib/format/date';
 import type { TransactionWithCategory } from '@/types/database';
@@ -13,10 +13,11 @@ interface Props {
 }
 
 export function TransactionListItem({ transaction }: Props) {
+  const theme = useTheme();
   const isIncome = transaction.type === 'income';
-  const color = transaction.category?.color ?? '#898781';
+  const color = transaction.category?.color ?? theme.textMuted;
   const sign = isIncome ? '+' : '-';
-  const amountColor = isIncome ? ChartColors.light.income : ChartColors.light.expense;
+  const amountColor = isIncome ? theme.success : theme.danger;
 
   return (
     <Pressable style={styles.row} onPress={() => router.push(`/transaction/${transaction.id}`)}>

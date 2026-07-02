@@ -1,15 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Feather } from '@expo/vector-icons';
-import { Link, router } from 'expo-router';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { z } from 'zod';
 
+import { AuthShell } from '@/components/auth/AuthShell';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { ChartColors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { useAuth } from '@/lib/auth/AuthContext';
 
 const schema = z.object({
@@ -20,6 +20,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function LoginScreen() {
+  const theme = useTheme();
   const { signIn } = useAuth();
   const [formError, setFormError] = useState<string | null>(null);
   const {
@@ -36,74 +37,49 @@ export default function LoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <View style={styles.container}>
-        <View style={styles.logoWrap}>
-          <Feather name="pie-chart" size={36} color={ChartColors.light.accent} />
+    <AuthShell mode="login">
+      {formError ? (
+        <View style={{ backgroundColor: theme.clayLight, borderRadius: 9, padding: 12, marginBottom: 16 }}>
+          <ThemedText type="small" style={{ color: theme.danger }}>
+            {formError}
+          </ThemedText>
         </View>
-        <ThemedText type="title" style={styles.title}>
-          Welcome back
-        </ThemedText>
-        <ThemedText themeColor="textSecondary" style={styles.subtitle}>
-          Log in to track your income and expenses.
-        </ThemedText>
+      ) : null}
 
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <Input
-              label="Email"
-              placeholder="you@example.com"
-              autoCapitalize="none"
-              keyboardType="email-address"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-              error={errors.email?.message}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <Input
-              label="Password"
-              placeholder="••••••••"
-              secureTextEntry
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-              error={errors.password?.message}
-            />
-          )}
-        />
+      <Controller
+        control={control}
+        name="email"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <Input
+            label="Email"
+            placeholder="you@example.com"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            onBlur={onBlur}
+            onChangeText={onChange}
+            value={value}
+            error={errors.email?.message}
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name="password"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <Input
+            label="Password"
+            placeholder="••••••••"
+            secureTextEntry
+            onBlur={onBlur}
+            onChangeText={onChange}
+            value={value}
+            error={errors.password?.message}
+          />
+        )}
+      />
 
-        {formError ? (
-          <ThemedText style={{ color: ChartColors.light.expense, marginBottom: 8 }}>{formError}</ThemedText>
-        ) : null}
-
-        <View style={styles.spacer} />
-        <Button label="Log in" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
-
-        <View style={styles.footer}>
-          <ThemedText themeColor="textSecondary">Don&apos;t have an account? </ThemedText>
-          <Link href="/(auth)/signup">
-            <ThemedText style={{ color: ChartColors.light.accent, fontWeight: '600' }}>Sign up</ThemedText>
-          </Link>
-        </View>
-      </View>
-    </KeyboardAvoidingView>
+      <View style={{ height: 8 }} />
+      <Button label="Log in" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
+    </AuthShell>
   );
 }
-
-const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  container: { flex: 1, justifyContent: 'center', paddingHorizontal: 24 },
-  logoWrap: { alignItems: 'center', marginBottom: 16 },
-  title: { fontSize: 28, marginBottom: 4 },
-  subtitle: { marginBottom: 32 },
-  spacer: { height: 8 },
-  footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
-});

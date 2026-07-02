@@ -5,11 +5,12 @@ import { ActivityIndicator, Alert, Pressable, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { TransactionForm, type TransactionFormValues } from '@/components/transactions/TransactionForm';
-import { ChartColors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { useDeleteTransaction, useUpdateTransaction } from '@/hooks/useTransactions';
 import { fetchTransactionById } from '@/lib/api/transactions';
 
 export default function EditTransactionScreen() {
+  const theme = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: transaction, isLoading } = useQuery({
     queryKey: ['transaction', id],
@@ -61,8 +62,8 @@ export default function EditTransactionScreen() {
       <Pressable
         onPress={onDelete}
         style={{ flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center', paddingVertical: 16 }}>
-        <Feather name="trash-2" size={16} color={ChartColors.light.expense} />
-        <ThemedText style={{ color: ChartColors.light.expense, fontWeight: '600' }}>Delete transaction</ThemedText>
+        <Feather name="trash-2" size={16} color={theme.danger} />
+        <ThemedText type="smallBold" style={{ color: theme.danger }}>Delete transaction</ThemedText>
       </Pressable>
     </View>
   );

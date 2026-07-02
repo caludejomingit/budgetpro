@@ -1,3 +1,13 @@
+import {
+  Fraunces_500Medium_Italic,
+  Fraunces_600SemiBold,
+} from '@expo-google-fonts/fraunces';
+import {
+  PublicSans_400Regular,
+  PublicSans_600SemiBold,
+  PublicSans_700Bold,
+  useFonts,
+} from '@expo-google-fonts/public-sans';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -31,6 +41,19 @@ function RootNavigator() {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const [fontsLoaded] = useFonts({
+    PublicSans_400Regular,
+    PublicSans_600SemiBold,
+    PublicSans_700Bold,
+    Fraunces_600SemiBold,
+    Fraunces_500Medium_Italic,
+  });
+
+  useEffect(() => {
+    if (fontsLoaded) SplashScreen.hideAsync();
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) return null;
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

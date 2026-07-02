@@ -1,7 +1,7 @@
 import { StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { ChartColors } from '@/constants/theme';
+import { Fonts, Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 interface InputProps extends TextInputProps {
@@ -23,13 +23,18 @@ export function Input({ label, error, style, ...rest }: InputProps) {
         placeholderTextColor={theme.textMuted}
         style={[
           styles.input,
-          { backgroundColor: theme.backgroundElement, color: theme.text, borderColor: error ? ChartColors.light.expense : 'transparent' },
+          {
+            backgroundColor: theme.backgroundSelected,
+            color: theme.text,
+            fontFamily: Fonts.sans,
+            borderColor: error ? theme.danger : 'transparent',
+          },
           style,
         ]}
         {...rest}
       />
       {error ? (
-        <ThemedText type="small" style={{ color: ChartColors.light.expense, marginTop: 4 }}>
+        <ThemedText type="small" style={{ color: theme.danger, marginTop: 4 }}>
           {error}
         </ThemedText>
       ) : null}
@@ -39,16 +44,16 @@ export function Input({ label, error, style, ...rest }: InputProps) {
 
 const styles = StyleSheet.create({
   wrapper: {
-    marginBottom: 4,
+    marginBottom: 12,
   },
   label: {
     marginBottom: 6,
   },
   input: {
-    height: 50,
-    borderRadius: 12,
+    height: 48,
+    borderRadius: Radius.md,
     borderWidth: 1.5,
     paddingHorizontal: 14,
-    fontSize: 16,
+    fontSize: 15,
   },
 });

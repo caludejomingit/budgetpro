@@ -1,9 +1,8 @@
 import { Feather } from '@expo/vector-icons';
-import { StyleSheet, View, useColorScheme } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
 import { ThemedText } from '@/components/themed-text';
-import { ChartColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 interface EmptyStateProps {
@@ -13,16 +12,33 @@ interface EmptyStateProps {
   children?: React.ReactNode;
 }
 
-/** A minimal illustration: a soft decorative ring behind a centered line icon. */
-function Illustration({ icon, accent }: { icon: keyof typeof Feather.glyphMap; accent: string }) {
+/**
+ * A minimal illustration: a small cluster of soft, offset brand-color blobs
+ * behind a centered icon badge — reads as a crafted illustration without
+ * needing hand-drawn art.
+ */
+function Illustration({
+  icon,
+  primary,
+  clay,
+  gold,
+  badgeBg,
+}: {
+  icon: keyof typeof Feather.glyphMap;
+  primary: string;
+  clay: string;
+  gold: string;
+  badgeBg: string;
+}) {
   return (
     <View style={styles.illustrationWrap}>
       <Svg width={140} height={140} viewBox="0 0 140 140">
-        <Circle cx={70} cy={70} r={68} fill={accent} opacity={0.08} />
-        <Circle cx={70} cy={70} r={48} fill={accent} opacity={0.12} />
+        <Circle cx={44} cy={50} r={40} fill={gold} opacity={0.16} />
+        <Circle cx={96} cy={92} r={34} fill={clay} opacity={0.16} />
+        <Circle cx={70} cy={70} r={46} fill={primary} opacity={0.12} />
       </Svg>
-      <View style={styles.iconOverlay}>
-        <Feather name={icon} size={40} color={accent} />
+      <View style={[styles.badge, { backgroundColor: badgeBg }]}>
+        <Feather name={icon} size={30} color={primary} />
       </View>
     </View>
   );
@@ -30,12 +46,10 @@ function Illustration({ icon, accent }: { icon: keyof typeof Feather.glyphMap; a
 
 export function EmptyState({ icon, title, message, children }: EmptyStateProps) {
   const theme = useTheme();
-  const scheme = useColorScheme();
-  const accent = ChartColors[scheme === 'dark' ? 'dark' : 'light'].accent;
 
   return (
     <View style={styles.container}>
-      <Illustration icon={icon} accent={accent} />
+      <Illustration icon={icon} primary={theme.primary} clay={theme.clay} gold={theme.gold} badgeBg={theme.backgroundElement} />
       <ThemedText type="subtitle" style={styles.title}>
         {title}
       </ThemedText>
@@ -61,13 +75,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 20,
   },
-  iconOverlay: {
+  badge: {
     position: 'absolute',
+    width: 68,
+    height: 68,
+    borderRadius: 34,
     alignItems: 'center',
     justifyContent: 'center',
   },
   title: {
-    fontSize: 20,
+    fontSize: 19,
     textAlign: 'center',
     marginBottom: 8,
   },

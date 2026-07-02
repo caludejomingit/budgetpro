@@ -4,6 +4,7 @@ import { StyleSheet, View, useColorScheme } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Card } from '@/components/ui/Card';
 import { ChartColors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import type { Tip } from '@/lib/insights/savingsTips';
 
 const ICONS: Record<Tip['severity'], keyof typeof Feather.glyphMap> = {
@@ -13,10 +14,11 @@ const ICONS: Record<Tip['severity'], keyof typeof Feather.glyphMap> = {
 };
 
 export function TipCard({ tip }: { tip: Tip }) {
+  const theme = useTheme();
   const scheme = useColorScheme();
   const status = ChartColors[scheme === 'dark' ? 'dark' : 'light'].status;
   const color = status[tip.severity === 'info' ? 'good' : tip.severity === 'warning' ? 'warning' : 'critical'];
-  const iconColor = tip.severity === 'info' ? ChartColors.light.accent : color;
+  const iconColor = tip.severity === 'info' ? theme.primary : color;
 
   return (
     <Card style={styles.card}>

@@ -8,7 +8,6 @@ import { ThemedText } from '@/components/themed-text';
 import { MonthPicker } from '@/components/transactions/MonthPicker';
 import { TransactionListItem } from '@/components/transactions/TransactionListItem';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { ChartColors } from '@/constants/theme';
 import { useCategories } from '@/hooks/useCategories';
 import { useTheme } from '@/hooks/use-theme';
 import { useTransactions } from '@/hooks/useTransactions';
@@ -68,7 +67,7 @@ export default function TransactionsScreen() {
         }
       />
 
-      <Pressable onPress={() => router.push('/transaction/new')} style={[styles.fab, { backgroundColor: ChartColors.light.accent }]}>
+      <Pressable onPress={() => router.push('/transaction/new')} style={[styles.fab, { backgroundColor: theme.primary }]}>
         <Feather name="plus" size={24} color="#ffffff" />
       </Pressable>
     </SafeAreaView>
