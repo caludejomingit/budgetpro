@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useRef } from 'react';
-import { Animated, Dimensions, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Animated, Dimensions, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -71,7 +71,7 @@ export function SideDrawer({ visible, onClose }: Props) {
             </View>
           </View>
 
-          <View style={styles.nav}>
+          <ScrollView style={styles.navScroll} contentContainerStyle={styles.nav} showsVerticalScrollIndicator={false}>
             {NAV_ITEMS.map((item) => (
               <Pressable key={item.name} style={styles.navItem} onPress={() => go(item.name)}>
                 <Feather name={item.icon} size={17} color="#CFE4D8" />
@@ -80,9 +80,7 @@ export function SideDrawer({ visible, onClose }: Props) {
                 </ThemedText>
               </Pressable>
             ))}
-          </View>
-
-          <View style={styles.spacer} />
+          </ScrollView>
 
           <View style={styles.monthNav}>
             <ThemedText type="small" style={styles.monthLabel}>
@@ -126,10 +124,10 @@ const styles = StyleSheet.create({
   mark: { width: 38, height: 38, borderRadius: 11, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
   brandT1: { color: '#EAF4EE', fontSize: 15.5 },
   brandT2: { color: '#B9D6C4', fontSize: 12 },
-  nav: { gap: 4, marginTop: -8 },
+  navScroll: { flex: 1, marginTop: -8 },
+  nav: { gap: 4, paddingBottom: 8 },
   navItem: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 10 },
   navLabel: { color: '#CFE4D8' },
-  spacer: { flex: 1 },
   monthNav: { backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 12, padding: 14 },
   monthLabel: { color: '#9FC4AF', fontSize: 10.5, fontWeight: '700', letterSpacing: 0.9, marginBottom: 6 },
   monthRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
