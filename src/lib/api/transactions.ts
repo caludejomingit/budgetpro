@@ -15,6 +15,15 @@ export async function fetchTransactionsForMonth(monthKey: MonthKey): Promise<Tra
   return data as unknown as TransactionWithCategory[];
 }
 
+export async function fetchAllTransactions(): Promise<TransactionWithCategory[]> {
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('*, category:categories(*)')
+    .order('occurred_on', { ascending: true });
+  if (error) throw error;
+  return data as unknown as TransactionWithCategory[];
+}
+
 export async function fetchTransactionsSince(startDate: string): Promise<TransactionWithCategory[]> {
   const { data, error } = await supabase
     .from('transactions')
@@ -38,6 +47,7 @@ export interface TransactionInput {
   amount: number;
   occurredOn: string;
   note?: string;
+  person?: string;
 }
 
 export async function createTransaction(input: TransactionInput): Promise<Transaction> {
@@ -50,6 +60,7 @@ export async function createTransaction(input: TransactionInput): Promise<Transa
       amount: input.amount,
       occurred_on: input.occurredOn,
       note: input.note || null,
+      person: input.person || 'Shared',
     })
     .select()
     .single();
@@ -66,6 +77,7 @@ export async function updateTransaction(id: string, input: Partial<TransactionIn
       amount: input.amount,
       occurred_on: input.occurredOn,
       note: input.note || null,
+      person: input.person || 'Shared',
     })
     .eq('id', id)
     .select()

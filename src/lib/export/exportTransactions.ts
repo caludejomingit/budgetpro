@@ -10,11 +10,12 @@ function buildWorkbook(transactions: TransactionWithCategory[]) {
       Date: t.occurred_on,
       Type: t.type === 'income' ? 'Income' : 'Expense',
       Category: t.category?.name ?? 'Other',
+      'Paid by': t.person,
       Note: t.note ?? '',
       'Amount (₹)': t.amount,
     }));
   const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [{ wch: 12 }, { wch: 10 }, { wch: 20 }, { wch: 32 }, { wch: 14 }];
+  ws['!cols'] = [{ wch: 12 }, { wch: 10 }, { wch: 20 }, { wch: 10 }, { wch: 32 }, { wch: 14 }];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Transactions');
   return wb;

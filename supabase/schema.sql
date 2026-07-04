@@ -113,6 +113,7 @@ create table public.transactions (
   amount numeric(12,2) not null check (amount > 0),
   occurred_on date not null,          -- the transaction date (used for month grouping)
   note text,
+  person text not null default 'Shared',  -- free-text "who this was for/paid by" label, e.g. Shared/Jomin/Malu
   created_at timestamptz not null default now()
 );
 
@@ -153,3 +154,55 @@ create policy "Users manage own budgets update"
   on public.budgets for update using (auth.uid() = user_id);
 create policy "Users manage own budgets delete"
   on public.budgets for delete using (auth.uid() = user_id);
+
+-- ============================================================
+-- 5. goals — savings goals (e.g. "Buy a car"), each with its own
+--    contribution ledger tracked separately from regular transactions
+-- ============================================================
+create table public.goals (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  name text not null,
+  target_amount numeric(12,2) not null check (target_amount > 0),
+  target_date date,
+  is_achieved boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+alter table public.goals enable row level security;
+
+create policy "Users manage own goals select"
+  on public.goals for select using (auth.uid() = user_id);
+create policy "Users manage own goals insert"
+  on public.goals for insert with check (auth.uid() = user_id);
+create policy "Users manage own goals update"
+  on public.goals for update using (auth.uid() = user_id);
+create policy "Users manage own goals delete"
+  on public.goals for delete using (auth.uid() = user_id);
+
+-- ============================================================
+-- 6. goal_contributions — individual savings entries logged against a goal
+-- ============================================================
+create table public.goal_contributions (
+  id uuid primary key default gen_random_uuid(),
+  goal_id uuid not null references public.goals(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  amount numeric(12,2) not null check (amount > 0),
+  occurred_on date not null,
+  note text,
+  created_at timestamptz not null default now()
+);
+
+create index goal_contributions_goal_idx
+  on public.goal_contributions (goal_id, occurred_on);
+
+alter table public.goal_contributions enable row level security;
+
+create policy "Users manage own goal contributions select"
+  on public.goal_contributions for select using (auth.uid() = user_id);
+create policy "Users manage own goal contributions insert"
+  on public.goal_contributions for insert with check (auth.uid() = user_id);
+create policy "Users manage own goal contributions update"
+  on public.goal_contributions for update using (auth.uid() = user_id);
+create policy "Users manage own goal contributions delete"
+  on public.goal_contributions for delete using (auth.uid() = user_id);

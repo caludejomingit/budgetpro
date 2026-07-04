@@ -11,10 +11,12 @@ import { useMonth } from '@/lib/state/MonthContext';
 const DRAWER_WIDTH = Math.min(280, Dimensions.get('window').width * 0.8);
 
 const NAV_ITEMS: { name: string; label: string; icon: keyof typeof Feather.glyphMap }[] = [
-  { name: 'index', label: 'Dashboard', icon: 'grid' },
+  { name: 'index', label: 'Home', icon: 'home' },
   { name: 'budgets', label: 'Budgets', icon: 'credit-card' },
   { name: 'transactions', label: 'Transactions', icon: 'book-open' },
   { name: 'insights', label: 'Insights', icon: 'pie-chart' },
+  { name: 'dashboard', label: 'Analytics Dashboard', icon: 'bar-chart-2' },
+  { name: 'goals', label: 'Goals', icon: 'target' },
   { name: 'chat', label: 'Budget Chat', icon: 'message-circle' },
   { name: 'profile', label: 'Profile', icon: 'user' },
 ];
@@ -39,8 +41,8 @@ export function SideDrawer({ visible, onClose }: Props) {
 
   const go = (name: string) => {
     onClose();
-    if (name === 'chat') {
-      router.push('/chat' as never);
+    if (name === 'chat' || name === 'dashboard' || name === 'goals') {
+      router.push(`/${name}` as never);
       return;
     }
     router.push(`/(tabs)/${name === 'index' ? '' : name}` as never);

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createTransaction,
   deleteTransaction,
+  fetchAllTransactions,
   fetchTransactionsForMonth,
   fetchTransactionsSince,
   updateTransaction,
@@ -29,6 +30,10 @@ export function useTransactionsRange(monthsBack: number) {
     queryKey: ['transactions', 'range', startDate],
     queryFn: () => fetchTransactionsSince(startDate),
   });
+}
+
+export function useAllTransactions() {
+  return useQuery({ queryKey: ['transactions', 'all'], queryFn: fetchAllTransactions });
 }
 
 export function useCreateTransaction() {

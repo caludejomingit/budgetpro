@@ -26,6 +26,7 @@ export interface Transaction {
   amount: number;
   occurred_on: string; // YYYY-MM-DD
   note: string | null;
+  person: string; // e.g. 'Shared', 'Jomin', 'Malu' — free-text "who this was for" label
   created_at: string;
 }
 
@@ -44,4 +45,29 @@ export interface Budget {
 
 export interface BudgetWithCategory extends Budget {
   category: Category;
+}
+
+export interface Goal {
+  id: string;
+  user_id: string;
+  name: string;
+  target_amount: number;
+  target_date: string | null; // YYYY-MM-DD
+  is_achieved: boolean;
+  created_at: string;
+}
+
+export interface GoalContribution {
+  id: string;
+  goal_id: string;
+  user_id: string;
+  amount: number;
+  occurred_on: string; // YYYY-MM-DD
+  note: string | null;
+  created_at: string;
+}
+
+export interface GoalWithProgress extends Goal {
+  savedAmount: number;
+  contributions: GoalContribution[];
 }

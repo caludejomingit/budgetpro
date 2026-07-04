@@ -30,6 +30,7 @@ export default function EditTransactionScreen() {
         amount: Number(values.amount),
         occurredOn: values.occurredOn,
         note: values.note,
+        person: values.person,
       },
     });
     router.back();

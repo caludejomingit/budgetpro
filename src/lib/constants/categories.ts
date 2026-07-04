@@ -51,6 +51,16 @@ export function categoryColor(name: string): string {
   return '#1E6B4E';
 }
 
+/** Preset "who this was for" tags. The field itself is free text — these are just quick-pick chips. */
+export const PERSON_PRESETS = ['Shared', 'Jomin', 'Malu'] as const;
+
+/** Categories treated as unavoidable/essential spend, mirroring the household's own classification. */
+export const ESSENTIAL_CATEGORIES: readonly string[] = ['Grocery', 'Food', 'Bills', 'Medical Bills', 'Rent', 'Petrol', 'EMI'];
+
+export function isEssentialCategory(name: string): boolean {
+  return ESSENTIAL_CATEGORIES.includes(name);
+}
+
 interface IconShape {
   circles?: { cx: number; cy: number; r: number }[];
   path?: string;

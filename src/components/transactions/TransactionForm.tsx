@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/Input';
 import { Radius } from '@/constants/theme';
 import { useCategories } from '@/hooks/useCategories';
 import { useTheme } from '@/hooks/use-theme';
+import { PERSON_PRESETS } from '@/lib/constants/categories';
 import type { CategoryType, TransactionWithCategory } from '@/types/database';
 
 const schema = z.object({
@@ -22,6 +23,7 @@ const schema = z.object({
   categoryId: z.string().min(1, 'Choose a category'),
   occurredOn: z.string().min(1),
   note: z.string().optional(),
+  person: z.string().min(1),
 });
 
 export type TransactionFormValues = z.infer<typeof schema>;
@@ -51,12 +53,14 @@ export function TransactionForm({ initialValues, onSubmit, submitLabel }: Props)
       categoryId: initialValues?.category_id ?? '',
       occurredOn: initialValues?.occurred_on ?? format(new Date(), 'yyyy-MM-dd'),
       note: initialValues?.note ?? '',
+      person: initialValues?.person ?? 'Shared',
     },
   });
 
   const type = watch('type');
   const occurredOn = watch('occurredOn');
   const categoryId = watch('categoryId');
+  const person = watch('person');
   const filteredCategories = (categories ?? []).filter((c) => c.type === type);
 
   const setType = (next: CategoryType) => {
@@ -145,6 +149,25 @@ export function TransactionForm({ initialValues, onSubmit, submitLabel }: Props)
         />
       ) : null}
 
+      <ThemedText type="small" themeColor="textSecondary" style={styles.label}>
+        Paid by
+      </ThemedText>
+      <View style={styles.personRow}>
+        {PERSON_PRESETS.map((p) => {
+          const active = person === p;
+          return (
+            <Pressable
+              key={p}
+              onPress={() => setValue('person', p)}
+              style={[styles.personChip, { backgroundColor: active ? theme.primary : theme.backgroundSelected }]}>
+              <ThemedText type="smallBold" style={{ color: active ? '#ffffff' : theme.text }}>
+                {p}
+              </ThemedText>
+            </Pressable>
+          );
+        })}
+      </View>
+
       <Controller
         control={control}
         name="note"
@@ -175,5 +198,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   dateButton: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 50, borderRadius: Radius.md, paddingHorizontal: 14, marginBottom: 16 },
+  personRow: { flexDirection: 'row', gap: 8, marginBottom: 4 },
+  personChip: { paddingHorizontal: 16, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
   spacer: { height: 8 },
 });
