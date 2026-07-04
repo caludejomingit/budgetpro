@@ -16,3 +16,12 @@ export function confirmAction(title: string, message: string, confirmLabel: stri
     { text: confirmLabel, style: destructive ? 'destructive' : 'default', onPress: onConfirm },
   ]);
 }
+
+/** Cross-platform single-button info/error message — same web fallback reasoning as confirmAction. */
+export function notify(title: string, message: string): void {
+  if (Platform.OS === 'web') {
+    window.alert(`${title}\n\n${message}`);
+    return;
+  }
+  Alert.alert(title, message);
+}

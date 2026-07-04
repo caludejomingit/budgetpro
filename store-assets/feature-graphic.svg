@@ -1,0 +1,13 @@
+<svg width="1024" height="500" viewBox="0 0 1024 500" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="500" fill="#164F3A"/>
+  <circle cx="120" cy="60" r="150" fill="#C9A03D" opacity="0.16"/>
+  <circle cx="900" cy="440" r="200" fill="#C97452" opacity="0.18"/>
+  <circle cx="820" cy="80" r="90" fill="#ffffff" opacity="0.06"/>
+
+  <rect x="80" y="160" width="180" height="180" rx="44" fill="rgba(255,255,255,0.14)"/>
+  <polyline points="120,300 165,255 195,285 250,220" fill="none" stroke="#EAF4EE" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="215,220 250,220 250,255" fill="none" stroke="#EAF4EE" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <text x="310" y="270" font-family="Arial, Helvetica, sans-serif" font-size="86" font-weight="700" fill="#EAF4EE">BudgetPro</text>
+  <text x="313" y="315" font-family="Arial, Helvetica, sans-serif" font-size="30" fill="#B9D6C4">Plan. Track. Grow.</text>
+</svg>

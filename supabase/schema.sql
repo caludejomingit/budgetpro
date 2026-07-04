@@ -41,6 +41,20 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
 
+-- Lets a signed-in user delete their own account (and, via the on-delete-cascade
+-- foreign keys on every table below, all their profile/transactions/budgets/
+-- goals data with it). Runs as security definer since deleting from auth.users
+-- isn't otherwise permitted by the client's role — auth.uid() still resolves to
+-- the caller's own id, so this can only ever delete the caller's own account.
+create or replace function public.delete_own_account()
+returns void as $$
+begin
+  delete from auth.users where id = auth.uid();
+end;
+$$ language plpgsql security definer;
+
+grant execute on function public.delete_own_account() to authenticated;
+
 -- ============================================================
 -- 2. categories — shared defaults (user_id null) + user-custom
 -- ============================================================

@@ -9,6 +9,7 @@
     "userInterfaceStyle": "automatic",
     "android": {
       "package": "com.jominclaude.budgetpro",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#F6F9F4",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

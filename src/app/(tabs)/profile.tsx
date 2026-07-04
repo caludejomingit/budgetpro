@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
-import { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -12,13 +12,14 @@ import { useTransactions } from '@/hooks/useTransactions';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { buildTipsPool, shuffle } from '@/lib/insights/savingsTips';
 import { useMonth } from '@/lib/state/MonthContext';
-import { confirmAction } from '@/lib/utils/confirm';
+import { confirmAction, notify } from '@/lib/utils/confirm';
 
 export default function ProfileScreen() {
   const theme = useTheme();
-  const { user, signOut } = useAuth();
+  const { user, signOut, deleteAccount } = useAuth();
   const { viewMonth } = useMonth();
   const { data: transactions } = useTransactions(viewMonth);
+  const [deleting, setDeleting] = useState(false);
 
   const displayName = (user?.user_metadata?.display_name as string | undefined) || user?.email?.split('@')[0] || 'there';
 
@@ -35,6 +36,21 @@ export default function ProfileScreen() {
 
   const onLogout = () => {
     confirmAction('Log out', `Log out of BudgetPro, ${displayName}?`, 'Log out', signOut, true);
+  };
+
+  const onDeleteAccount = () => {
+    confirmAction(
+      'Delete account',
+      "This permanently deletes your account and every transaction, budget, and goal you've logged. This can't be undone.",
+      'Delete everything',
+      async () => {
+        setDeleting(true);
+        const { error } = await deleteAccount();
+        setDeleting(false);
+        if (error) notify('Could not delete account', error);
+      },
+      true
+    );
   };
 
   return (
@@ -81,6 +97,17 @@ export default function ProfileScreen() {
             Log out
           </ThemedText>
         </Pressable>
+
+        <Pressable onPress={onDeleteAccount} disabled={deleting} style={styles.deleteAccountBtn}>
+          {deleting ? (
+            <ActivityIndicator size="small" color={theme.danger} />
+          ) : (
+            <Feather name="trash-2" size={14} color={theme.danger} />
+          )}
+          <ThemedText type="small" style={{ color: theme.danger }}>
+            Delete my account and all data
+          </ThemedText>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
@@ -98,4 +125,5 @@ const styles = StyleSheet.create({
   tipText: { lineHeight: 19 },
   infoCard: { gap: 4 },
   logoutBtn: { flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderRadius: 12 },
+  deleteAccountBtn: { flexDirection: 'row', gap: 6, alignItems: 'center', justifyContent: 'center', paddingVertical: 10 },
 });
