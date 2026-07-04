@@ -7,26 +7,29 @@ import { useTheme } from '@/hooks/use-theme';
 import { formatCurrency, formatCurrencyCompact } from '@/lib/format/currency';
 
 interface Props {
-  total: number;
+  income: number;
+  expense: number;
   transactionCount: number;
   activeMonths: number;
   topCategory: { name: string; total: number } | null;
-  savings: number;
 }
 
-export function KpiRow({ total, transactionCount, activeMonths, topCategory, savings }: Props) {
+export function KpiRow({ income, expense, transactionCount, activeMonths, topCategory }: Props) {
   const theme = useTheme();
-  const avgMonth = activeMonths > 0 ? total / activeMonths : 0;
-  const avgTxn = transactionCount > 0 ? total / transactionCount : 0;
-  const savingsRate = total > 0 ? (savings / total) * 100 : 0;
+  const net = income - expense;
+  const avgIncomeMonth = activeMonths > 0 ? income / activeMonths : income;
+  const avgExpenseMonth = activeMonths > 0 ? expense / activeMonths : expense;
 
-  const items: { label: string; icon: keyof typeof Feather.glyphMap; value: string; sub: string; tone?: 'clay' | 'good' }[] = [
-    { label: 'Total Spend', icon: 'credit-card', value: formatCurrencyCompact(total), sub: `${transactionCount} transactions` },
-    { label: 'Avg Monthly Spend', icon: 'calendar', value: formatCurrencyCompact(avgMonth), sub: `across ${activeMonths} month(s)` },
-    { label: 'Transactions', icon: 'list', value: transactionCount.toLocaleString('en-IN'), sub: transactionCount ? `${formatCurrency(avgTxn)} avg/txn` : '' },
-    { label: 'Top Category', icon: 'award', value: topCategory?.name ?? '—', sub: topCategory ? `${formatCurrency(topCategory.total)} spent` : '', tone: 'clay' },
-    { label: 'Savings Rate', icon: 'trending-up', value: `${savingsRate.toFixed(1)}%`, sub: `${formatCurrency(savings)} saved`, tone: savingsRate >= 10 ? 'good' : 'clay' },
+  const items: { label: string; icon: keyof typeof Feather.glyphMap; value: string; sub: string; tone: 'income' | 'expense' | 'net' | 'neutral' }[] = [
+    { label: 'Income', icon: 'arrow-down-circle', value: formatCurrencyCompact(income), sub: `${formatCurrencyCompact(avgIncomeMonth)}/month avg`, tone: 'income' },
+    { label: 'Expense', icon: 'arrow-up-circle', value: formatCurrencyCompact(expense), sub: `${formatCurrencyCompact(avgExpenseMonth)}/month avg`, tone: 'expense' },
+    { label: 'Net Savings', icon: 'trending-up', value: `${net >= 0 ? '' : '-'}${formatCurrencyCompact(Math.abs(net))}`, sub: income > 0 ? `${Math.round((net / income) * 100)}% of income` : '', tone: 'net' },
+    { label: 'Transactions', icon: 'list', value: transactionCount.toLocaleString('en-IN'), sub: `across ${activeMonths || 1} month(s)`, tone: 'neutral' },
+    { label: 'Top Expense', icon: 'award', value: topCategory?.name ?? '—', sub: topCategory ? formatCurrency(topCategory.total) : '', tone: 'neutral' },
   ];
+
+  const toneColor = (tone: (typeof items)[number]['tone']) =>
+    tone === 'income' ? theme.success : tone === 'expense' ? theme.clay : tone === 'net' ? (net >= 0 ? theme.success : theme.danger) : theme.primary;
 
   return (
     <View style={styles.row}>
@@ -38,11 +41,11 @@ export function KpiRow({ total, transactionCount, activeMonths, topCategory, sav
               {item.label.toUpperCase()}
             </ThemedText>
           </View>
-          <ThemedText type="subtitle" style={[styles.value, { color: theme.primary }]} numberOfLines={1}>
+          <ThemedText type="subtitle" style={[styles.value, { color: toneColor(item.tone) }]} numberOfLines={1}>
             {item.value}
           </ThemedText>
           {item.sub ? (
-            <ThemedText type="small" style={{ color: item.tone === 'clay' ? theme.clay : item.tone === 'good' ? theme.success : theme.textSecondary }} numberOfLines={1}>
+            <ThemedText type="small" themeColor="textSecondary" numberOfLines={1}>
               {item.sub}
             </ThemedText>
           ) : null}
@@ -57,5 +60,5 @@ const styles = StyleSheet.create({
   card: { flexGrow: 1, flexBasis: 150, gap: 4 },
   labelRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   label: { fontSize: 10.5, fontWeight: '700', letterSpacing: 0.6 },
-  value: { fontSize: 20 },
+  value: { fontSize: 19 },
 });

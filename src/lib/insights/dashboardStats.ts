@@ -6,6 +6,7 @@ import type { InsightNote } from '@/lib/insights/savingsTips';
 import type { TransactionWithCategory } from '@/types/database';
 
 export interface DashboardFilters {
+  type: 'income' | 'expense' | null; // null = both
   month: string | null; // 'yyyy-MM' or null for all
   category: string | null;
   person: string | null;
@@ -23,7 +24,7 @@ export function monthLabelOf(monthKey: string): string {
 export function filterTransactions(transactions: TransactionWithCategory[], filters: DashboardFilters): TransactionWithCategory[] {
   const search = filters.search.trim().toLowerCase();
   return transactions.filter((t) => {
-    if (t.type !== 'expense') return false;
+    if (filters.type && t.type !== filters.type) return false;
     if (filters.month && monthKeyOf(t.occurred_on) !== filters.month) return false;
     if (filters.category && t.category?.name !== filters.category) return false;
     if (filters.person && t.person !== filters.person) return false;
@@ -33,8 +34,17 @@ export function filterTransactions(transactions: TransactionWithCategory[], filt
 }
 
 export function orderedMonthKeys(transactions: TransactionWithCategory[]): string[] {
-  const set = new Set(transactions.filter((t) => t.type === 'expense').map((t) => monthKeyOf(t.occurred_on)));
+  const set = new Set(transactions.map((t) => monthKeyOf(t.occurred_on)));
   return Array.from(set).sort();
+}
+
+export function monthlyIncomeExpense(transactions: TransactionWithCategory[], months: string[]): { monthKey: string; label: string; income: number; expense: number }[] {
+  return months.map((monthKey) => ({
+    monthKey,
+    label: monthLabelOf(monthKey),
+    income: transactions.filter((t) => t.type === 'income' && monthKeyOf(t.occurred_on) === monthKey).reduce((s, t) => s + t.amount, 0),
+    expense: transactions.filter((t) => t.type === 'expense' && monthKeyOf(t.occurred_on) === monthKey).reduce((s, t) => s + t.amount, 0),
+  }));
 }
 
 export function monthlyTotals(transactions: TransactionWithCategory[], months: string[]): { monthKey: string; label: string; total: number }[] {
@@ -117,39 +127,40 @@ export function essentialSplit(transactions: TransactionWithCategory[]): { essen
   return { essential, nonEssential };
 }
 
-/** Turns the filtered numbers into a short, readable narrative — the "story" behind the charts. */
+/** Turns the filtered numbers into a short, readable narrative — the "story" behind the charts. Kept tight (one clause each) since this renders as a compact scrollable ticker, not a full report. */
 export function buildDashboardStory(
-  transactions: TransactionWithCategory[],
+  expenseTransactions: TransactionWithCategory[],
+  totalIncome: number,
   months: string[],
-  cats: { name: string; total: number }[],
-  trend: { monthKey: string; label: string; total: number }[],
+  expenseCats: { name: string; total: number }[],
+  expenseTrend: { monthKey: string; label: string; total: number }[],
   split: { essential: number; nonEssential: number }
 ): InsightNote[] {
   const notes: InsightNote[] = [];
-  const total = transactions.reduce((s, t) => s + t.amount, 0);
-  if (total === 0 || transactions.length === 0) return notes;
+  const totalExpense = expenseTransactions.reduce((s, t) => s + t.amount, 0);
+  if (totalExpense === 0 && totalIncome === 0) return notes;
 
-  const avgMonth = months.length > 0 ? total / months.length : total;
+  const net = totalIncome - totalExpense;
+  if (totalIncome > 0) {
+    const rate = Math.round((net / totalIncome) * 100);
+    notes.push({
+      tag: 'Net position',
+      variant: net >= 0 ? (rate >= 10 ? 'gold' : 'default') : 'warn',
+      text: `${formatCurrency(totalIncome)} in, ${formatCurrency(totalExpense)} out — net ${net >= 0 ? '+' : ''}${formatCurrency(net)} (${rate}%).`,
+    });
+  } else if (totalExpense > 0) {
+    const avgMonth = months.length > 0 ? totalExpense / months.length : totalExpense;
+    notes.push({
+      tag: 'The big picture',
+      variant: 'default',
+      text: `${expenseTransactions.length} expenses totalling ${formatCurrency(totalExpense)} — averaging ${formatCurrency(avgMonth)}/month.`,
+    });
+  }
 
-  notes.push({
-    tag: 'The big picture',
-    variant: 'default',
-    text: `Across ${months.length || 1} month${months.length === 1 ? '' : 's'} you've logged ${transactions.length} expenses totalling ${formatCurrency(total)} — averaging ${formatCurrency(avgMonth)} a month.`,
-  });
-
-  if (trend.length > 1) {
-    const peak = [...trend].sort((a, b) => b.total - a.total)[0];
-    if (peak.total > avgMonth * 1.05) {
-      const pct = Math.round(((peak.total - avgMonth) / avgMonth) * 100);
-      notes.push({
-        tag: 'Heaviest month',
-        variant: 'warn',
-        text: `${peak.label} was your biggest month at ${formatCurrency(peak.total)} — ${pct}% above your average.`,
-      });
-    }
-
-    const last = trend[trend.length - 1];
-    const prev = trend[trend.length - 2];
+  if (expenseTrend.length > 1) {
+    const avgMonth = totalExpense / (months.length || 1);
+    const last = expenseTrend[expenseTrend.length - 1];
+    const prev = expenseTrend[expenseTrend.length - 2];
     if (prev.total > 0) {
       const deltaPct = Math.round(((last.total - prev.total) / prev.total) * 100);
       if (Math.abs(deltaPct) >= 5) {
@@ -159,17 +170,18 @@ export function buildDashboardStory(
           text: `Spending ${deltaPct > 0 ? 'rose' : 'fell'} ${Math.abs(deltaPct)}% from ${prev.label} to ${last.label}.`,
         });
       }
+    } else {
+      const peak = [...expenseTrend].sort((a, b) => b.total - a.total)[0];
+      if (peak.total > avgMonth * 1.05) {
+        notes.push({ tag: 'Heaviest month', variant: 'warn', text: `${peak.label} was your biggest month at ${formatCurrency(peak.total)}.` });
+      }
     }
   }
 
-  if (cats.length > 0) {
-    const top = cats[0];
-    const pct = Math.round((top.total / total) * 100);
-    notes.push({
-      tag: 'Top category',
-      variant: 'gold',
-      text: `${top.name} leads your spending at ${formatCurrency(top.total)} — ${pct}% of everything you've spent.`,
-    });
+  if (expenseCats.length > 0) {
+    const top = expenseCats[0];
+    const pct = Math.round((top.total / totalExpense) * 100);
+    notes.push({ tag: 'Top category', variant: 'gold', text: `${top.name} leads at ${formatCurrency(top.total)} (${pct}% of spend).` });
   }
 
   const splitTotal = split.essential + split.nonEssential;
@@ -178,26 +190,16 @@ export function buildDashboardStory(
     notes.push({
       tag: 'Essential vs. lifestyle',
       variant: essentialPct < 55 ? 'warn' : 'default',
-      text: `${essentialPct}% of your money goes to essentials like groceries, rent and bills; the remaining ${100 - essentialPct}% is discretionary.`,
+      text: `${essentialPct}% essentials, ${100 - essentialPct}% discretionary.`,
     });
   }
 
-  const biggest = [...transactions].sort((a, b) => b.amount - a.amount)[0];
+  const biggest = [...expenseTransactions].sort((a, b) => b.amount - a.amount)[0];
   if (biggest) {
     notes.push({
-      tag: 'Biggest single expense',
+      tag: 'Biggest expense',
       variant: 'warn',
-      text: `Your largest single expense was ${biggest.note?.trim() || biggest.category?.name || 'an expense'} for ${formatCurrency(biggest.amount)} on ${format(parseISO(biggest.occurred_on), 'd MMM yyyy')}.`,
-    });
-  }
-
-  const savings = cats.find((c) => c.name === 'Savings');
-  if (savings) {
-    const pct = Math.round((savings.total / total) * 100);
-    notes.push({
-      tag: 'Savings rate',
-      variant: pct >= 10 ? 'gold' : 'warn',
-      text: `You've tucked away ${formatCurrency(savings.total)} in Savings — a ${pct}% savings rate.`,
+      text: `${biggest.note?.trim() || biggest.category?.name || 'An expense'} — ${formatCurrency(biggest.amount)} on ${format(parseISO(biggest.occurred_on), 'd MMM')}.`,
     });
   }
 

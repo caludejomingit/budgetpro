@@ -4,40 +4,44 @@ import Svg, { Circle } from 'react-native-svg';
 
 import { ThemedText } from '@/components/themed-text';
 import { useTheme } from '@/hooks/use-theme';
-import { formatCurrency } from '@/lib/format/currency';
+import { formatCurrencyCompact } from '@/lib/format/currency';
 
 interface Props {
-  total: number;
+  income: number;
+  expense: number;
   months: number;
-  transactionCount: number;
 }
 
-export function DashboardHero({ total, months, transactionCount }: Props) {
+export function DashboardHero({ income, expense, months }: Props) {
   const theme = useTheme();
+  const net = income - expense;
 
   return (
     <View style={[styles.wrap, { backgroundColor: theme.primaryDark }]}>
-      <Svg width="100%" height="100%" style={StyleSheet.absoluteFill} viewBox="0 0 320 140" preserveAspectRatio="xMidYMid slice">
-        <Circle cx={40} cy={26} r={60} fill={theme.gold} opacity={0.16} />
-        <Circle cx={272} cy={112} r={72} fill={theme.clay} opacity={0.18} />
-        <Circle cx={190} cy={16} r={38} fill="#ffffff" opacity={0.08} />
+      <Svg width="100%" height="100%" style={StyleSheet.absoluteFill} viewBox="0 0 320 90" preserveAspectRatio="xMidYMid slice">
+        <Circle cx={30} cy={14} r={44} fill={theme.gold} opacity={0.16} />
+        <Circle cx={290} cy={80} r={54} fill={theme.clay} opacity={0.18} />
       </Svg>
       <View style={[styles.iconBadge, { backgroundColor: 'rgba(255,255,255,0.14)' }]}>
-        <Feather name="compass" size={20} color="#EAF4EE" />
+        <Feather name="compass" size={18} color="#EAF4EE" />
       </View>
-      <ThemedText type="subtitle" style={styles.headline}>
-        Here&apos;s the story of your money
-      </ThemedText>
-      <ThemedText type="small" style={styles.sub}>
-        {transactionCount.toLocaleString('en-IN')} expenses across {months || 1} month{months === 1 ? '' : 's'} · {formatCurrency(total)} total
-      </ThemedText>
+      <View style={styles.textWrap}>
+        <ThemedText type="smallBold" style={styles.headline}>
+          Your money story
+        </ThemedText>
+        <ThemedText type="small" style={styles.sub} numberOfLines={1}>
+          {formatCurrencyCompact(income)} in · {formatCurrencyCompact(expense)} out · net {net >= 0 ? '+' : ''}
+          {formatCurrencyCompact(net)} · {months || 1}mo
+        </ThemedText>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { borderRadius: 20, padding: 20, overflow: 'hidden', gap: 6, minHeight: 128, justifyContent: 'center' },
-  iconBadge: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 2 },
-  headline: { color: '#EAF4EE', fontSize: 19 },
+  wrap: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 18, padding: 14, overflow: 'hidden' },
+  iconBadge: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  textWrap: { flex: 1, gap: 2 },
+  headline: { color: '#EAF4EE', fontSize: 15 },
   sub: { color: '#CFE4D8' },
 });

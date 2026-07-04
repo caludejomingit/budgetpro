@@ -52,10 +52,11 @@ export function TransactionExplorer({ transactions }: Props) {
       await exportRowsToCsv(
         sorted.map((t) => ({
           Date: t.occurred_on,
+          Type: t.type === 'income' ? 'Income' : 'Expense',
           Category: t.category?.name ?? 'Other',
           Note: t.note ?? '',
           'Paid by': t.person,
-          Essential: isEssentialCategory(t.category?.name ?? '') ? 'Essential' : 'Non-Essential',
+          Essential: t.type === 'expense' ? (isEssentialCategory(t.category?.name ?? '') ? 'Essential' : 'Non-Essential') : '',
           'Amount (INR)': t.amount,
         })),
         `BudgetPro-Dashboard-Export-${format(new Date(), 'yyyy-MM-dd')}.csv`
@@ -117,10 +118,12 @@ export function TransactionExplorer({ transactions }: Props) {
               {t.note || '—'}
             </ThemedText>
             <ThemedText type="small" themeColor="textMuted" style={styles.metaLine} numberOfLines={1}>
-              {t.person} · {isEssentialCategory(t.category?.name ?? '') ? 'Essential' : 'Non-Essential'}
+              {t.person}
+              {t.type === 'expense' ? ` · ${isEssentialCategory(t.category?.name ?? '') ? 'Essential' : 'Non-Essential'}` : ' · Income'}
             </ThemedText>
           </View>
-          <ThemedText type="amountSmall" style={{ flex: 1 }}>
+          <ThemedText type="amountSmall" style={{ flex: 1, color: t.type === 'income' ? theme.success : theme.text }}>
+            {t.type === 'income' ? '+' : ''}
             {formatCurrency(t.amount)}
           </ThemedText>
         </View>
