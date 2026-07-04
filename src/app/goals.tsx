@@ -1,15 +1,16 @@
 import { Feather } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { GoalCard } from '@/components/goals/GoalCard';
+import { GoalsHero } from '@/components/goals/GoalsHero';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { DateField } from '@/components/ui/DateField';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Input } from '@/components/ui/Input';
 import { useTheme } from '@/hooks/use-theme';
@@ -31,11 +32,20 @@ export default function GoalsScreen() {
   const addContribution = useAddGoalContribution();
   const deleteContribution = useDeleteGoalContribution();
 
+  const heroStats = useMemo(() => {
+    const list = goals ?? [];
+    return {
+      goalCount: list.length,
+      totalSaved: list.reduce((s, g) => s + g.savedAmount, 0),
+      totalTarget: list.reduce((s, g) => s + g.target_amount, 0),
+      achievedCount: list.filter((g) => g.savedAmount >= g.target_amount).length,
+    };
+  }, [goals]);
+
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState('');
   const [target, setTarget] = useState('');
   const [targetDate, setTargetDate] = useState<string | null>(null);
-  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const resetForm = () => {
     setName('');
@@ -65,6 +75,8 @@ export default function GoalsScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
+        <GoalsHero {...heroStats} />
+
         {showForm ? (
           <Card style={styles.formCard}>
             <Input label="Goal name" placeholder="e.g. Buy a car" value={name} onChangeText={setName} />
@@ -79,21 +91,15 @@ export default function GoalsScreen() {
             <ThemedText type="small" themeColor="textSecondary" style={styles.label}>
               Target date (optional)
             </ThemedText>
-            <Pressable onPress={() => setShowDatePicker(true)} style={[styles.dateButton, { backgroundColor: theme.backgroundSelected }]}>
-              <Feather name="calendar" size={16} color={theme.text} />
-              <ThemedText>{targetDate ? format(new Date(targetDate), 'd MMM yyyy') : 'No target date'}</ThemedText>
-            </Pressable>
-            {showDatePicker ? (
-              <DateTimePicker
-                value={targetDate ? new Date(targetDate) : new Date()}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'inline' : 'default'}
-                minimumDate={new Date()}
-                onChange={(_event, date) => {
-                  setShowDatePicker(Platform.OS === 'ios');
-                  if (date) setTargetDate(format(date, 'yyyy-MM-dd'));
-                }}
-              />
+            <View style={styles.dateWrap}>
+              <DateField value={targetDate ?? format(new Date(), 'yyyy-MM-dd')} onChange={setTargetDate} minimumDate={new Date()} />
+            </View>
+            {targetDate ? (
+              <Pressable onPress={() => setTargetDate(null)} style={styles.clearDate}>
+                <ThemedText type="small" themeColor="textMuted" style={{ textDecorationLine: 'underline' }}>
+                  Clear target date
+                </ThemedText>
+              </Pressable>
             ) : null}
             <View style={styles.formActions}>
               <View style={styles.formActionFlex}>
@@ -145,7 +151,8 @@ const styles = StyleSheet.create({
   newGoalBtn: { flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderRadius: 14, borderWidth: 1.5 },
   formCard: { gap: 2 },
   label: { marginBottom: 8, marginTop: 4 },
-  dateButton: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 50, borderRadius: 14, paddingHorizontal: 14, marginBottom: 8 },
+  dateWrap: { marginBottom: 4 },
+  clearDate: { marginBottom: 8, alignSelf: 'flex-start' },
   formActions: { flexDirection: 'row', gap: 10, marginTop: 4 },
   formActionFlex: { flex: 1 },
   loader: { marginTop: 30 },

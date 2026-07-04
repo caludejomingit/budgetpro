@@ -33,7 +33,12 @@ export function useTransactionsRange(monthsBack: number) {
 }
 
 export function useAllTransactions() {
-  return useQuery({ queryKey: ['transactions', 'all'], queryFn: fetchAllTransactions });
+  return useQuery({
+    queryKey: ['transactions', 'all'],
+    queryFn: fetchAllTransactions,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+  });
 }
 
 export function useCreateTransaction() {

@@ -12,7 +12,7 @@ import {
 const GOALS_KEY = ['goals'] as const;
 
 export function useGoals() {
-  return useQuery({ queryKey: GOALS_KEY, queryFn: fetchGoals });
+  return useQuery({ queryKey: GOALS_KEY, queryFn: fetchGoals, refetchOnMount: 'always', refetchOnWindowFocus: true });
 }
 
 export function useCreateGoal() {

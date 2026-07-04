@@ -1,6 +1,8 @@
 import { format, parseISO } from 'date-fns';
 
 import { isEssentialCategory } from '@/lib/constants/categories';
+import { formatCurrency } from '@/lib/format/currency';
+import type { InsightNote } from '@/lib/insights/savingsTips';
 import type { TransactionWithCategory } from '@/types/database';
 
 export interface DashboardFilters {
@@ -113,4 +115,91 @@ export function essentialSplit(transactions: TransactionWithCategory[]): { essen
     else nonEssential += t.amount;
   }
   return { essential, nonEssential };
+}
+
+/** Turns the filtered numbers into a short, readable narrative — the "story" behind the charts. */
+export function buildDashboardStory(
+  transactions: TransactionWithCategory[],
+  months: string[],
+  cats: { name: string; total: number }[],
+  trend: { monthKey: string; label: string; total: number }[],
+  split: { essential: number; nonEssential: number }
+): InsightNote[] {
+  const notes: InsightNote[] = [];
+  const total = transactions.reduce((s, t) => s + t.amount, 0);
+  if (total === 0 || transactions.length === 0) return notes;
+
+  const avgMonth = months.length > 0 ? total / months.length : total;
+
+  notes.push({
+    tag: 'The big picture',
+    variant: 'default',
+    text: `Across ${months.length || 1} month${months.length === 1 ? '' : 's'} you've logged ${transactions.length} expenses totalling ${formatCurrency(total)} — averaging ${formatCurrency(avgMonth)} a month.`,
+  });
+
+  if (trend.length > 1) {
+    const peak = [...trend].sort((a, b) => b.total - a.total)[0];
+    if (peak.total > avgMonth * 1.05) {
+      const pct = Math.round(((peak.total - avgMonth) / avgMonth) * 100);
+      notes.push({
+        tag: 'Heaviest month',
+        variant: 'warn',
+        text: `${peak.label} was your biggest month at ${formatCurrency(peak.total)} — ${pct}% above your average.`,
+      });
+    }
+
+    const last = trend[trend.length - 1];
+    const prev = trend[trend.length - 2];
+    if (prev.total > 0) {
+      const deltaPct = Math.round(((last.total - prev.total) / prev.total) * 100);
+      if (Math.abs(deltaPct) >= 5) {
+        notes.push({
+          tag: deltaPct > 0 ? 'Trending up' : 'Trending down',
+          variant: deltaPct > 0 ? 'warn' : 'default',
+          text: `Spending ${deltaPct > 0 ? 'rose' : 'fell'} ${Math.abs(deltaPct)}% from ${prev.label} to ${last.label}.`,
+        });
+      }
+    }
+  }
+
+  if (cats.length > 0) {
+    const top = cats[0];
+    const pct = Math.round((top.total / total) * 100);
+    notes.push({
+      tag: 'Top category',
+      variant: 'gold',
+      text: `${top.name} leads your spending at ${formatCurrency(top.total)} — ${pct}% of everything you've spent.`,
+    });
+  }
+
+  const splitTotal = split.essential + split.nonEssential;
+  if (splitTotal > 0) {
+    const essentialPct = Math.round((split.essential / splitTotal) * 100);
+    notes.push({
+      tag: 'Essential vs. lifestyle',
+      variant: essentialPct < 55 ? 'warn' : 'default',
+      text: `${essentialPct}% of your money goes to essentials like groceries, rent and bills; the remaining ${100 - essentialPct}% is discretionary.`,
+    });
+  }
+
+  const biggest = [...transactions].sort((a, b) => b.amount - a.amount)[0];
+  if (biggest) {
+    notes.push({
+      tag: 'Biggest single expense',
+      variant: 'warn',
+      text: `Your largest single expense was ${biggest.note?.trim() || biggest.category?.name || 'an expense'} for ${formatCurrency(biggest.amount)} on ${format(parseISO(biggest.occurred_on), 'd MMM yyyy')}.`,
+    });
+  }
+
+  const savings = cats.find((c) => c.name === 'Savings');
+  if (savings) {
+    const pct = Math.round((savings.total / total) * 100);
+    notes.push({
+      tag: 'Savings rate',
+      variant: pct >= 10 ? 'gold' : 'warn',
+      text: `You've tucked away ${formatCurrency(savings.total)} in Savings — a ${pct}% savings rate.`,
+    });
+  }
+
+  return notes;
 }

@@ -1,15 +1,13 @@
-import { Feather } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { format, parseISO } from 'date-fns';
-import { useState } from 'react';
+import { format } from 'date-fns';
 import { Controller, useForm } from 'react-hook-form';
-import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { z } from 'zod';
 
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { CategoryGlyph } from '@/components/ui/CategoryGlyph';
+import { DateField } from '@/components/ui/DateField';
 import { Input } from '@/components/ui/Input';
 import { Radius } from '@/constants/theme';
 import { useCategories } from '@/hooks/useCategories';
@@ -37,7 +35,6 @@ interface Props {
 export function TransactionForm({ initialValues, onSubmit, submitLabel }: Props) {
   const theme = useTheme();
   const { data: categories } = useCategories();
-  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const {
     control,
@@ -130,24 +127,9 @@ export function TransactionForm({ initialValues, onSubmit, submitLabel }: Props)
       <ThemedText type="small" themeColor="textSecondary" style={styles.label}>
         Date
       </ThemedText>
-      <Pressable
-        onPress={() => setShowDatePicker(true)}
-        style={[styles.dateButton, { backgroundColor: theme.backgroundSelected }]}>
-        <Feather name="calendar" size={16} color={theme.text} />
-        <ThemedText>{format(parseISO(occurredOn), 'd MMM yyyy')}</ThemedText>
-      </Pressable>
-      {showDatePicker ? (
-        <DateTimePicker
-          value={parseISO(occurredOn)}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'inline' : 'default'}
-          maximumDate={new Date()}
-          onChange={(_event, date) => {
-            setShowDatePicker(Platform.OS === 'ios');
-            if (date) setValue('occurredOn', format(date, 'yyyy-MM-dd'));
-          }}
-        />
-      ) : null}
+      <View style={styles.dateWrap}>
+        <DateField value={occurredOn} onChange={(v) => setValue('occurredOn', v)} maximumDate={new Date()} />
+      </View>
 
       <ThemedText type="small" themeColor="textSecondary" style={styles.label}>
         Paid by
@@ -197,7 +179,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1.5,
   },
-  dateButton: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 50, borderRadius: Radius.md, paddingHorizontal: 14, marginBottom: 16 },
+  dateWrap: { marginBottom: 16 },
   personRow: { flexDirection: 'row', gap: 8, marginBottom: 4 },
   personChip: { paddingHorizontal: 16, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
   spacer: { height: 8 },

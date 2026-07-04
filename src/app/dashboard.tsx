@@ -5,20 +5,25 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'reac
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CategoryDonut } from '@/components/dashboard/CategoryDonut';
+import { DashboardHero } from '@/components/dashboard/DashboardHero';
 import { EssentialSplitBar } from '@/components/dashboard/EssentialSplitBar';
 import { FilterBar } from '@/components/dashboard/FilterBar';
 import { HeatMatrix } from '@/components/dashboard/HeatMatrix';
 import { KpiRow } from '@/components/dashboard/KpiRow';
 import { RankedBarList } from '@/components/dashboard/RankedBarList';
+import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { StackedMonthChart } from '@/components/dashboard/StackedMonthChart';
 import { Treemap } from '@/components/dashboard/Treemap';
 import { TransactionExplorer } from '@/components/dashboard/TransactionExplorer';
 import { TrendChart } from '@/components/dashboard/TrendChart';
+import { NoteCard } from '@/components/insights/NoteCard';
 import { ThemedText } from '@/components/themed-text';
 import { Card } from '@/components/ui/Card';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { useTheme } from '@/hooks/use-theme';
 import { useAllTransactions } from '@/hooks/useTransactions';
 import {
+  buildDashboardStory,
   buildHeatMatrix,
   categoryTotals,
   essentialSplit,
@@ -47,6 +52,7 @@ export default function DashboardScreen() {
   const heatMatrix = useMemo(() => buildHeatMatrix(filtered, filteredMonths), [filtered, filteredMonths]);
   const stacked = useMemo(() => stackedByMonthAndCategory(filtered, filteredMonths, heatMatrix.categories), [filtered, filteredMonths, heatMatrix.categories]);
   const split = useMemo(() => essentialSplit(filtered), [filtered]);
+  const story = useMemo(() => buildDashboardStory(filtered, filteredMonths, cats, trend, split), [filtered, filteredMonths, cats, trend, split]);
 
   const total = filtered.reduce((s, t) => s + t.amount, 0);
   const savings = cats.find((c) => c.name === 'Savings')?.total ?? 0;
@@ -67,8 +73,20 @@ export default function DashboardScreen() {
 
       {isLoading ? (
         <ActivityIndicator style={styles.loader} color={theme.primary} />
+      ) : allExpenses.length === 0 ? (
+        <EmptyState icon="compass" title="Nothing to tell yet" message="Log a few expenses and this dashboard will turn them into your money story." />
       ) : (
         <ScrollView contentContainerStyle={styles.content}>
+          <DashboardHero total={total} months={filteredMonths.length} transactionCount={filtered.length} />
+
+          {story.length > 0 ? (
+            <View style={styles.storyGrid}>
+              {story.map((note) => (
+                <NoteCard key={note.tag + note.text} note={note} />
+              ))}
+            </View>
+          ) : null}
+
           <FilterBar filters={filters} onChange={setFilters} months={allMonths} categories={allCategories} />
 
           <KpiRow
@@ -80,45 +98,42 @@ export default function DashboardScreen() {
           />
 
           <Card style={styles.card}>
-            <ThemedText type="smallBold">Monthly Spend Trend</ThemedText>
+            <SectionHeader icon="trending-up" title="Monthly Spend Trend" />
             <TrendChart data={trend} />
           </Card>
 
           <Card style={styles.card}>
-            <ThemedText type="smallBold">Spend by Category</ThemedText>
+            <SectionHeader icon="pie-chart" title="Spend by Category" />
             <CategoryDonut data={cats} />
           </Card>
 
           <Card style={styles.card}>
-            <ThemedText type="smallBold">Top 10 Spending Items</ThemedText>
-            <ThemedText type="small" themeColor="textSecondary" style={styles.cardSubtitle}>
-              Grouped by note/description
-            </ThemedText>
+            <SectionHeader icon="bar-chart-2" title="Top 10 Spending Items" subtitle="Grouped by note/description" />
             <RankedBarList data={topItems} />
           </Card>
 
           <Card style={styles.card}>
-            <ThemedText type="smallBold">Category × Month Heat Matrix</ThemedText>
+            <SectionHeader icon="grid" title="Category × Month Heat Matrix" />
             <HeatMatrix matrix={heatMatrix} />
           </Card>
 
           <Card style={styles.card}>
-            <ThemedText type="smallBold">Monthly Spend by Category</ThemedText>
+            <SectionHeader icon="bar-chart-2" title="Monthly Spend by Category" />
             <StackedMonthChart data={stacked} categories={heatMatrix.categories} />
           </Card>
 
           <Card style={styles.card}>
-            <ThemedText type="smallBold">Category Proportion</ThemedText>
+            <SectionHeader icon="square" title="Category Proportion" />
             <Treemap data={cats} />
           </Card>
 
           <Card style={styles.card}>
-            <ThemedText type="smallBold">Essential vs. Non-Essential Spend</ThemedText>
+            <SectionHeader icon="check-circle" title="Essential vs. Non-Essential Spend" />
             <EssentialSplitBar essential={split.essential} nonEssential={split.nonEssential} />
           </Card>
 
           <Card style={styles.card}>
-            <ThemedText type="smallBold">Transaction Explorer</ThemedText>
+            <SectionHeader icon="list" title="Transaction Explorer" />
             <TransactionExplorer transactions={filtered} />
           </Card>
         </ScrollView>
@@ -133,7 +148,7 @@ const styles = StyleSheet.create({
   headerTitleWrap: { gap: 1 },
   closeBtn: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
   content: { padding: 20, gap: 16, paddingBottom: 40 },
-  card: { gap: 6 },
-  cardSubtitle: { marginTop: -4, marginBottom: 4 },
+  storyGrid: { gap: 12 },
+  card: { gap: 12 },
   loader: { marginTop: 40 },
 });

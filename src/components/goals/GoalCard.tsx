@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { format, parseISO } from 'date-fns';
+import { differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/Input';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { goalTheme } from '@/lib/constants/goalIcon';
 import { formatCurrency } from '@/lib/format/currency';
 import { confirmAction } from '@/lib/utils/confirm';
 import type { GoalWithProgress } from '@/types/database';
@@ -31,6 +32,8 @@ export function GoalCard({ goal, onAddContribution, onDeleteContribution, onDele
   const ratio = goal.target_amount > 0 ? goal.savedAmount / goal.target_amount : 0;
   const remaining = Math.max(0, goal.target_amount - goal.savedAmount);
   const achieved = goal.savedAmount >= goal.target_amount;
+  const { icon, color } = goalTheme(goal.name);
+  const daysLeft = goal.target_date ? differenceInCalendarDays(parseISO(goal.target_date), new Date()) : null;
 
   const submit = async () => {
     const value = Number(amount);
@@ -48,13 +51,17 @@ export function GoalCard({ goal, onAddContribution, onDeleteContribution, onDele
   return (
     <Card style={styles.card}>
       <View style={styles.headRow}>
+        <View style={[styles.iconBadge, { backgroundColor: `${color}1F` }]}>
+          <Feather name={icon} size={20} color={color} />
+        </View>
         <View style={styles.flexShrink}>
-          <ThemedText type="smallBold" numberOfLines={1}>
+          <ThemedText type="smallBold" numberOfLines={1} style={styles.nameText}>
             {goal.name}
           </ThemedText>
           {goal.target_date ? (
             <ThemedText type="small" themeColor="textMuted">
               Target: {format(parseISO(goal.target_date), 'd MMM yyyy')}
+              {daysLeft !== null && !achieved ? (daysLeft >= 0 ? ` · ${daysLeft}d left` : ' · overdue') : ''}
             </ThemedText>
           ) : null}
         </View>
@@ -68,11 +75,15 @@ export function GoalCard({ goal, onAddContribution, onDeleteContribution, onDele
       <ProgressBar ratio={ratio} height={10} />
 
       <View style={styles.amountsRow}>
-        <ThemedText type="amountSmall" style={{ color: theme.primary }}>
+        <ThemedText type="amountSmall" style={{ color }}>
           {formatCurrency(goal.savedAmount)}
         </ThemedText>
         <ThemedText type="small" themeColor="textMuted">
           of {formatCurrency(goal.target_amount)}
+        </ThemedText>
+        <View style={styles.pctSpacer} />
+        <ThemedText type="small" themeColor="textMuted">
+          {Math.round(ratio * 100)}%
         </ThemedText>
       </View>
 
@@ -85,7 +96,7 @@ export function GoalCard({ goal, onAddContribution, onDeleteContribution, onDele
         </View>
       ) : (
         <ThemedText type="small" themeColor="textSecondary">
-          {formatCurrency(remaining)} to go · {Math.round(ratio * 100)}%
+          {formatCurrency(remaining)} to go
         </ThemedText>
       )}
 
@@ -133,10 +144,13 @@ export function GoalCard({ goal, onAddContribution, onDeleteContribution, onDele
 
 const styles = StyleSheet.create({
   card: { gap: 10 },
-  headRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 },
-  flexShrink: { flexShrink: 1, gap: 2 },
+  headRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 },
+  iconBadge: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  nameText: { fontSize: 15.5 },
+  flexShrink: { flex: 1, gap: 2 },
   deleteBtn: { padding: 4 },
   amountsRow: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
+  pctSpacer: { flex: 1 },
   achievedPill: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
   toggleRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
   expandedWrap: { gap: 10, marginTop: 4 },
