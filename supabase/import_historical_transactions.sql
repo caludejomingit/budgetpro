@@ -1,18 +1,21 @@
--- One-time import of historical expense data (402 transactions,
--- 2026-02-01 to 2026-06-14), sourced from the analytics
--- dashboard you shared. All rows import as type='expense' against your
--- existing categories, tagged with the same Person label from that data.
+-- One-time import of historical expense data (430 transactions,
+-- 2026-02-01 to 2026-06-27), sourced from the analytics
+-- dashboard you shared plus later additions. All rows import as
+-- type='expense' against your existing categories, tagged with the same
+-- Person label from that data.
 --
--- BEFORE RUNNING: replace 'YOUR_LOGIN_EMAIL' below with the email address
--- you use to log into BudgetPro, then run this once in the Supabase SQL
--- Editor. Safe to re-run — already-imported rows are skipped automatically.
+-- BEFORE RUNNING: make sure supabase/add_person_and_goals.sql has already
+-- been run once (it adds the 'person' column this script needs). Confirm
+-- the email below matches the address you use to log into BudgetPro, then
+-- run this in the Supabase SQL Editor. Safe to re-run — already-imported
+-- rows are skipped automatically.
 
 do $$
 declare
   v_user_id uuid;
   v_inserted int;
 begin
-  select id into v_user_id from auth.users where email = 'YOUR_LOGIN_EMAIL';
+  select id into v_user_id from auth.users where email = 'jomyattayil@gmail.com';
   if v_user_id is null then
     raise exception 'No auth user found with that email — edit the email address at the top of this script and re-run.';
   end if;
@@ -420,7 +423,35 @@ begin
   ('2026-06-14', 'Food', 740, 'Bakery', 'Shared'),
   ('2026-06-14', 'Miscellaneous', 680, 'Trees', 'Shared'),
   ('2026-06-14', 'Grocery', 70, 'Water', 'Shared'),
-  ('2026-06-14', 'Grocery', 30, 'Milk', 'Shared')
+  ('2026-06-14', 'Grocery', 30, 'Milk', 'Shared'),
+  ('2026-06-15', 'Grocery', 70, 'Water', 'Shared'),
+  ('2026-06-15', 'Grocery', 30, 'Milk', 'Shared'),
+  ('2026-06-16', 'Grocery', 100, 'Zepto', 'Shared'),
+  ('2026-06-16', 'Grocery', 40, 'Milk', 'Shared'),
+  ('2026-06-16', 'Grocery', 315, 'Zepto', 'Shared'),
+  ('2026-06-16', 'Food', 45, 'Hotel Food', 'Shared'),
+  ('2026-06-16', 'Bills', 1500, 'KSEB', 'Shared'),
+  ('2026-06-16', 'Travel Expense', 150, 'CAB', 'Shared'),
+  ('2026-06-18', 'Grocery', 135, 'ZEPTO', 'Shared'),
+  ('2026-06-18', 'Food', 180, 'ZOMATO', 'Shared'),
+  ('2026-06-18', 'Grocery', 37, 'MILK', 'Shared'),
+  ('2026-06-18', 'Food', 120, 'Hotel Food', 'Shared'),
+  ('2026-06-19', 'Grocery', 30, 'Milk', 'Shared'),
+  ('2026-06-19', 'Food', 178, 'hotel Food', 'Shared'),
+  ('2026-06-20', 'Travel Expense', 300, 'Auto', 'Shared'),
+  ('2026-06-20', 'Food', 1058, 'PARAGON CALICUT', 'Shared'),
+  ('2026-06-20', 'Shopping', 2975, 'SM Street', 'Shared'),
+  ('2026-06-22', 'Bills', 582, 'Mobile', 'Shared'),
+  ('2026-06-22', 'Miscellaneous', 280, 'Haircut', 'Shared'),
+  ('2026-06-24', 'Food', 1015, 'hotel Food', 'Shared'),
+  ('2026-06-24', 'Bills', 582, 'Mobile', 'Shared'),
+  ('2026-06-26', 'Medical Bills', 200, 'Caritas', 'Shared'),
+  ('2026-06-26', 'Food', 2350, 'Caritas Food', 'Shared'),
+  ('2026-06-27', 'Petrol', 3000, 'Car', 'Shared'),
+  ('2026-06-27', 'Travel Expense', 150, 'Bus', 'Shared'),
+  ('2026-06-27', 'Bills', 500, 'WIFI', 'Shared'),
+  ('2026-06-27', 'Miscellaneous', 2000, 'TV Repair', 'Shared'),
+  ('2026-06-27', 'Miscellaneous', 1691, '', 'Shared')
   )
   insert into public.transactions (user_id, category_id, type, amount, occurred_on, note, person)
   select v_user_id, c.id, 'expense', r.amount, r.occurred_on::date, nullif(r.note, ''), r.person
